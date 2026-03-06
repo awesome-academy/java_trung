@@ -19,7 +19,7 @@ public class Suggestion extends BaseEntity {
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id", nullable = false)
+	@JoinColumn(name = "user_id", nullable = false, columnDefinition = "CHAR(36)")
 	private User user;
 
 	@Column(nullable = false, length = 200)
