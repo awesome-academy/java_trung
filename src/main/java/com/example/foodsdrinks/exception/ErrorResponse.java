@@ -1,5 +1,6 @@
 package com.example.foodsdrinks.exception;
 
+import com.example.foodsdrinks.config.MessageHelper;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,20 +19,20 @@ public class ErrorResponse {
     private final LocalDateTime timestamp;
     private final Map<String, String> fieldErrors;
 
-    public static ErrorResponse of(ErrorCode code) {
+    public static ErrorResponse of(ErrorCode code, MessageHelper messageHelper) {
         return ErrorResponse.builder()
                 .status(code.getStatus().value())
                 .error(code.getStatus().getReasonPhrase())
-                .message(code.getMessage())
+                .message(messageHelper.get(code.getMessageKey()))
                 .timestamp(LocalDateTime.now())
                 .build();
     }
 
-    public static ErrorResponse of(ErrorCode code, String customMessage) {
+    public static ErrorResponse of(ErrorCode code, MessageHelper messageHelper, Object... args) {
         return ErrorResponse.builder()
                 .status(code.getStatus().value())
                 .error(code.getStatus().getReasonPhrase())
-                .message(customMessage)
+                .message(messageHelper.get(code.getMessageKey(), args))
                 .timestamp(LocalDateTime.now())
                 .build();
     }
@@ -40,7 +41,6 @@ public class ErrorResponse {
         return ErrorResponse.builder()
                 .status(code.getStatus().value())
                 .error(code.getStatus().getReasonPhrase())
-                .message(code.getMessage())
                 .timestamp(LocalDateTime.now())
                 .fieldErrors(fieldErrors)
                 .build();

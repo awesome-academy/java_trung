@@ -8,42 +8,42 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
-    EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "Email already exists"),
-    INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "Invalid email or password"),
-    ACCOUNT_DISABLED(HttpStatus.FORBIDDEN, "Account is disabled"),
-    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Authentication required"),
-    FORBIDDEN(HttpStatus.FORBIDDEN, "Access denied"),
+    EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "error.email.already.exists"),
+    INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "error.invalid.credentials"),
+    ACCOUNT_DISABLED(HttpStatus.FORBIDDEN, "error.account.disabled"),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "error.unauthorized"),
+    FORBIDDEN(HttpStatus.FORBIDDEN, "error.forbidden"),
 
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found"),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "error.user.not.found"),
 
-    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "Category not found"),
-    CATEGORY_ALREADY_EXISTS(HttpStatus.CONFLICT, "Category with this name and classify already exists"),
-    CATEGORY_HAS_PRODUCTS(HttpStatus.CONFLICT, "Cannot delete category that has products"),
+    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "error.category.not.found"),
+    CATEGORY_ALREADY_EXISTS(HttpStatus.CONFLICT, "error.category.already.exists"),
+    CATEGORY_HAS_PRODUCTS(HttpStatus.CONFLICT, "error.category.has.products"),
 
-    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "Product not found"),
-    PRODUCT_UNAVAILABLE(HttpStatus.BAD_REQUEST, "Product is not available"),
-    INSUFFICIENT_STOCK(HttpStatus.BAD_REQUEST, "Insufficient stock for product: %s"),
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "error.product.not.found"),
+    PRODUCT_UNAVAILABLE(HttpStatus.BAD_REQUEST, "error.product.unavailable"),
+    INSUFFICIENT_STOCK(HttpStatus.BAD_REQUEST, "error.insufficient.stock"),
 
-    CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "Cart item not found"),
-    CART_EMPTY(HttpStatus.BAD_REQUEST, "Cart is empty"),
+    CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "error.cart.item.not.found"),
+    CART_EMPTY(HttpStatus.BAD_REQUEST, "error.cart.empty"),
 
-    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "Order not found"),
-    ORDER_ACCESS_DENIED(HttpStatus.FORBIDDEN, "You do not have access to this order"),
-    INVALID_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "Invalid order status transition"),
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "error.order.not.found"),
+    ORDER_ACCESS_DENIED(HttpStatus.FORBIDDEN, "error.order.access.denied"),
+    INVALID_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "error.invalid.status.transition"),
 
-    RATING_NOT_FOUND(HttpStatus.NOT_FOUND, "Rating not found"),
-    ALREADY_RATED(HttpStatus.CONFLICT, "You have already rated this product"),
-    NOT_PURCHASED(HttpStatus.FORBIDDEN, "You can only rate products you have purchased"),
+    RATING_NOT_FOUND(HttpStatus.NOT_FOUND, "error.rating.not.found"),
+    ALREADY_RATED(HttpStatus.CONFLICT, "error.already.rated"),
+    NOT_PURCHASED(HttpStatus.FORBIDDEN, "error.not.purchased"),
 
-    SUGGESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "Suggestion not found"),
+    SUGGESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "error.suggestion.not.found"),
 
-    VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "Validation failed"),
-    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+    VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "error.validation.failed"),
+    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "error.internal");
 
     private final HttpStatus status;
-    private final String message;
+    private final String messageKey;
 
     public String formatMessage(Object... args) {
-        return String.format(this.message, args);
+        return String.format(this.messageKey, args);
     }
 }

@@ -1,5 +1,7 @@
 package com.example.foodsdrinks.exception;
 
+import com.example.foodsdrinks.config.MessageHelper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -14,14 +16,17 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice(basePackages = "com.example.foodsdrinks.controller.api")
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final MessageHelper messageHelper;
 
     @ExceptionHandler(AppException.class)
     public ResponseEntity<ErrorResponse> handleAppException(AppException ex) {
         log.warn("AppException: {}", ex.getMessage());
         return ResponseEntity
                 .status(ex.getErrorCode().getStatus())
-                .body(ErrorResponse.of(ex.getErrorCode(), ex.getMessage()));
+                .body(ErrorResponse.of(ex.getErrorCode(), messageHelper));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -42,7 +47,7 @@ public class GlobalExceptionHandler {
         log.warn("AuthenticationException: {}", ex.getMessage());
         return ResponseEntity
                 .status(ErrorCode.UNAUTHORIZED.getStatus())
-                .body(ErrorResponse.of(ErrorCode.UNAUTHORIZED));
+                .body(ErrorResponse.of(ErrorCode.UNAUTHORIZED, messageHelper));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -50,7 +55,7 @@ public class GlobalExceptionHandler {
         log.warn("AccessDeniedException: {}", ex.getMessage());
         return ResponseEntity
                 .status(ErrorCode.FORBIDDEN.getStatus())
-                .body(ErrorResponse.of(ErrorCode.FORBIDDEN));
+                .body(ErrorResponse.of(ErrorCode.FORBIDDEN, messageHelper));
     }
 
     @ExceptionHandler(Exception.class)
@@ -58,6 +63,6 @@ public class GlobalExceptionHandler {
         log.error("Unhandled exception: {}", ex.getMessage(), ex);
         return ResponseEntity
                 .status(ErrorCode.INTERNAL_ERROR.getStatus())
-                .body(ErrorResponse.of(ErrorCode.INTERNAL_ERROR));
+                .body(ErrorResponse.of(ErrorCode.INTERNAL_ERROR, messageHelper));
     }
 }
