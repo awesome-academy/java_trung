@@ -71,27 +71,27 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain adminFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/admin/**")
+                .securityMatcher("/templates /admin/**")
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin/login").permitAll()
+                        .requestMatchers("/templates /admin/login").permitAll()
                         .anyRequest().hasRole("ADMIN")
                 )
                 .formLogin(form -> form
-                        .loginPage("/admin/login")
-                        .loginProcessingUrl("/admin/login")
-                        .defaultSuccessUrl("/admin/dashboard", true)
-                        .failureUrl("/admin/login?error=true")
+                        .loginPage("/templates /admin/login")
+                        .loginProcessingUrl("/templates /admin/login")
+                        .defaultSuccessUrl("/templates /admin/dashboard", true)
+                        .failureUrl("/templates /admin/login?error=true")
                         .usernameParameter("email")
                         .passwordParameter("password")
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/admin/logout")
-                        .logoutSuccessUrl("/admin/login?logout=true")
+                        .logoutUrl("/templates /admin/logout")
+                        .logoutSuccessUrl("/templates /admin/login?logout=true")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                 )
                 .exceptionHandling(ex -> ex
-                        .accessDeniedPage("/admin/login?error=access")
+                        .accessDeniedPage("/templates /admin/login?error=access")
                 );
 
         return http.build();
@@ -101,15 +101,15 @@ public class SecurityConfig {
     @Order(3)
     public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
         http
+                .securityMatcher(
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/api-docs/**",
+                        "/error"
+                )
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/api-docs/**",
-                                "/error"
-                        ).permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 );
 
         return http.build();
