@@ -38,7 +38,10 @@ public enum ErrorCode {
     SUGGESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "error.suggestion.not.found"),
 
     VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "error.validation.failed"),
-    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "error.internal");
+    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "error.internal"),
+
+    MALFORMED_JSON(HttpStatus.BAD_REQUEST, "error.malformed.json"),
+    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "error.method.not.allowed");
 
     private final HttpStatus status;
     private final String messageKey;
