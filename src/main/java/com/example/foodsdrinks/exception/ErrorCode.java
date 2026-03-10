@@ -41,7 +41,9 @@ public enum ErrorCode {
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "error.internal"),
 
     MALFORMED_JSON(HttpStatus.BAD_REQUEST, "error.malformed.json"),
-    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "error.method.not.allowed");
+    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "error.method.not.allowed"),
+
+    INVALID_ENUM_VALUE(HttpStatus.BAD_REQUEST, "error.invalid.enum.value");
 
     private final HttpStatus status;
     private final String messageKey;

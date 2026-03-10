@@ -42,7 +42,7 @@ public class User extends BaseEntity {
 
 	@Column(name = "is_active", nullable = false)
 	@Builder.Default
-	private boolean isActive = true;
+	private boolean active = true;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<CartItem> cartItems;

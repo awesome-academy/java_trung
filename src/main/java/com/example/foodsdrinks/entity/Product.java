@@ -55,7 +55,7 @@ public class Product extends BaseEntity {
 
     @Column(name = "is_available", nullable = false)
     @Builder.Default
-    private boolean isAvailable = true;
+    private boolean available = true;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Rating> ratings;
