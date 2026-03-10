@@ -20,7 +20,7 @@ public class Rating extends BaseEntity {
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id", nullable = false)
+	@JoinColumn(name = "user_id", nullable = false, columnDefinition = "CHAR(36)")
 	private User user;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -32,7 +32,7 @@ public class Rating extends BaseEntity {
 	private Order order;
 
 	@Column(nullable = false)
-	private int score;
+	private Byte score;
 
 	@Column(columnDefinition = "TEXT")
 	private String comment;
