@@ -43,6 +43,7 @@ public enum ErrorCode {
     MALFORMED_JSON(HttpStatus.BAD_REQUEST, "error.malformed.json"),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "error.method.not.allowed"),
 
+    INVALID_PRICE_RANGE(HttpStatus.BAD_REQUEST, "error.invalid.price.range"),
     INVALID_ENUM_VALUE(HttpStatus.BAD_REQUEST, "error.invalid.enum.value");
 
     private final HttpStatus status;

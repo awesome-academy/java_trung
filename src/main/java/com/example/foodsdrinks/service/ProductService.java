@@ -1,5 +1,6 @@
 package com.example.foodsdrinks.service;
 
+import com.example.foodsdrinks.dto.request.ProductFilterRequest;
 import com.example.foodsdrinks.dto.response.ProductResponse;
 import com.example.foodsdrinks.entity.Product;
 import com.example.foodsdrinks.entity.enums.Classify;
@@ -25,20 +26,21 @@ public class ProductService {
     private final ProductMapper productMapper;
 
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getAll(
-            String search,
-            Long categoryId,
-            Classify classify,
-            BigDecimal minPrice,
-            BigDecimal maxPrice,
-            Boolean available,
-            Pageable pageable) {
+    public Page<ProductResponse> getAll(ProductFilterRequest filter, Pageable pageable) {
+        if (filter.getMinPrice() != null && filter.getMaxPrice() != null
+                && filter.getMinPrice().compareTo(filter.getMaxPrice()) > 0) {
+            throw new AppException(ErrorCode.INVALID_PRICE_RANGE);
+        }
 
         Specification<Product> spec = ProductSpecification.filter(
-                search, categoryId, classify, minPrice, maxPrice, available);
+                filter.getSearch(),
+                filter.getCategoryId(),
+                filter.getClassify(),
+                filter.getMinPrice(),
+                filter.getMaxPrice(),
+                filter.getAvailable());
 
-        return productRepository.findAll(spec, pageable)
-                .map(productMapper::toResponse);
+        return productRepository.findAll(spec, pageable).map(productMapper::toResponse);
     }
 
     @Transactional(readOnly = true)
