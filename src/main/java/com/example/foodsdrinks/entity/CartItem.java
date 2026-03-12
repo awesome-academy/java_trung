@@ -3,6 +3,8 @@ package com.example.foodsdrinks.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(
 	name = "cart_items",
@@ -30,4 +32,8 @@ public class CartItem extends BaseEntity {
 	@Column(nullable = false)
 	@Builder.Default
 	private int quantity = 1;
+
+	public BigDecimal getSubtotal() {
+		return product.getPrice().multiply(BigDecimal.valueOf(quantity));
+	}
 }
