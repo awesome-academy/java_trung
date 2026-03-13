@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -47,14 +48,10 @@ public class OrderService {
             throw new AppException(ErrorCode.CART_EMPTY);
         }
 
-        // Validate all items before making any changes
+        // Validate availability early for clearer error messages.
         for (CartItem cartItem : cartItems) {
-            Product product = cartItem.getProduct();
-            if (!product.isAvailable()) {
+            if (!cartItem.getProduct().isAvailable()) {
                 throw new AppException(ErrorCode.PRODUCT_UNAVAILABLE);
-            }
-            if (product.getStock() < cartItem.getQuantity()) {
-                throw new AppException(ErrorCode.INSUFFICIENT_STOCK, product.getName());
             }
         }
 
@@ -72,25 +69,31 @@ public class OrderService {
                 .note(request.getNote())
                 .build();
 
-        // Build order items, deduct stock
+        // Build order items, deduct stock with guarded atomic updates.
         List<OrderItem> orderItems = new ArrayList<>();
-        for (CartItem cartItem : cartItems) {
-            Product product = cartItem.getProduct();
-            BigDecimal unitPrice = product.getPrice();
-            BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+        cartItems.stream()
+                .sorted(Comparator.comparing(ci -> ci.getProduct().getId()))
+                .forEach(cartItem -> {
+                    Product product = cartItem.getProduct();
+                    int qty = cartItem.getQuantity();
 
-            OrderItem orderItem = OrderItem.builder()
-                    .order(order)
-                    .product(product)
-                    .quantity(cartItem.getQuantity())
-                    .unitPrice(unitPrice)
-                    .subtotal(subtotal)
-                    .build();
-            orderItems.add(orderItem);
+                    int updated = productRepository.decrementStock(product.getId(), qty);
+                    if (updated == 0) {
+                        throw new AppException(ErrorCode.INSUFFICIENT_STOCK, product.getName());
+                    }
 
-            product.setStock(product.getStock() - cartItem.getQuantity());
-            productRepository.save(product);
-        }
+                    BigDecimal unitPrice = product.getPrice();
+                    BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(qty));
+
+                    OrderItem orderItem = OrderItem.builder()
+                            .order(order)
+                            .product(product)
+                            .quantity(qty)
+                            .unitPrice(unitPrice)
+                            .subtotal(subtotal)
+                            .build();
+                    orderItems.add(orderItem);
+                });
 
         order.setOrderItems(orderItems);
         Order savedOrder = orderRepository.save(order);
@@ -107,7 +110,8 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public OrderResponse getOrderDetail(String userId, Long orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        Order order = orderRepository.findWithDetailsById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         if (!order.getUser().getId().equals(userId)) {
             throw new AppException(ErrorCode.ORDER_ACCESS_DENIED);
@@ -141,9 +145,10 @@ public class OrderService {
 
     private void restoreStock(Order order) {
         for (OrderItem item : order.getOrderItems()) {
-            Product product = item.getProduct();
-            product.setStock(product.getStock() + item.getQuantity());
-            productRepository.save(product);
+            int updated = productRepository.incrementStock(item.getProduct().getId(), item.getQuantity());
+            if (updated == 0) {
+                throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+            }
         }
     }
 }
