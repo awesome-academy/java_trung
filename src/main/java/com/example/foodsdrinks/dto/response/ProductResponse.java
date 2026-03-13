@@ -16,10 +16,11 @@ public class ProductResponse {
     private String name;
     private String description;
     private BigDecimal price;
+    private Integer stock;
     private String imageUrl;
     private boolean available;
     private BigDecimal avgRating;
-    private int ratingCount;
+    private Integer ratingCount;
     private Long categoryId;
     private String categoryName;
     private Classify classify;
