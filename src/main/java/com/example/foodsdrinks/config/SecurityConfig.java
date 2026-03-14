@@ -71,27 +71,27 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain adminFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/templates /admin/**")
+                .securityMatcher("/admin/**")
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/templates /admin/login").permitAll()
+                        .requestMatchers("/admin/login").permitAll()
                         .anyRequest().hasRole("ADMIN")
                 )
                 .formLogin(form -> form
-                        .loginPage("/templates /admin/login")
-                        .loginProcessingUrl("/templates /admin/login")
-                        .defaultSuccessUrl("/templates /admin/dashboard", true)
-                        .failureUrl("/templates /admin/login?error=true")
+                        .loginPage("/admin/login")
+                        .loginProcessingUrl("/admin/login")
+                        .defaultSuccessUrl("/admin/dashboard", true)
+                        .failureUrl("/admin/login?error=true")
                         .usernameParameter("email")
                         .passwordParameter("password")
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/templates /admin/logout")
-                        .logoutSuccessUrl("/templates /admin/login?logout=true")
+                        .logoutUrl("/admin/logout")
+                        .logoutSuccessUrl("/admin/login?logout=true")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                 )
                 .exceptionHandling(ex -> ex
-                        .accessDeniedPage("/templates /admin/login?error=access")
+                        .accessDeniedPage("/admin/login?error=access")
                 );
 
         return http.build();

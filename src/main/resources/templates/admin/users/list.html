@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Users</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0"><i class="bi bi-people me-2"></i>Users</h4>
+    </div>
+
+    <!-- Flash messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form th:action="@{/admin/users}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">Email</label>
+                    <input type="text" name="email" class="form-control"
+                           th:value="${filter.email}" placeholder="Search by email..."/>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small text-muted">Role</label>
+                    <select name="role" class="form-select">
+                        <option value="">All Roles</option>
+                        <option th:each="r : ${roleOptions}"
+                                th:value="${r.name()}"
+                                th:text="${r.name()}"
+                                th:selected="${filter.role == r}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small text-muted">Status</label>
+                    <select name="active" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="true"  th:selected="${filter.active == true}">Active</option>
+                        <option value="false" th:selected="${filter.active == false}">Inactive</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-1"></i>Search
+                    </button>
+                    <a th:href="@{/admin/users}" class="btn btn-outline-secondary w-100">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-dark">
+                <tr>
+                    <th class="ps-3">#</th>
+                    <th>Email</th>
+                    <th>Full Name</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${users.isEmpty()}">
+                    <td colspan="7" class="text-center text-muted py-4">No users found.</td>
+                </tr>
+                <tr th:each="user, stat : ${users.content}">
+                    <td class="ps-3" th:text="${users.number * users.size + stat.index + 1}"></td>
+                    <td th:text="${user.email}"></td>
+                    <td th:text="${user.fullName != null ? user.fullName : '—'}"></td>
+                    <td>
+                        <span th:class="${user.role.name() == 'ADMIN'} ? 'badge bg-danger' : 'badge bg-secondary'"
+                              th:text="${user.role.name()}"></span>
+                    </td>
+                    <td>
+                        <span th:class="${user.active} ? 'badge bg-success' : 'badge bg-warning text-dark'"
+                              th:text="${user.active} ? 'Active' : 'Inactive'"></span>
+                    </td>
+                    <td th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td class="text-center">
+                        <form th:action="@{/admin/users/{id}/toggle-active(id=${user.id})}" method="post">
+                            <button type="submit"
+                                    th:class="${user.active} ? 'btn btn-sm btn-outline-warning' : 'btn btn-sm btn-outline-success'"
+                                    th:text="${user.active} ? 'Disable' : 'Enable'">
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav th:if="${users.totalPages > 1}" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li th:class="${users.hasPrevious()} ? 'page-item' : 'page-item disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/users(page=${users.number - 1}, size=${users.size}, email=${filter.email}, role=${filter.role}, active=${filter.active})}">
+                    &laquo;
+                </a>
+            </li>
+            <li th:each="i : ${#numbers.sequence(0, users.totalPages - 1)}"
+                th:class="${i == users.number} ? 'page-item active' : 'page-item'">
+                <a class="page-link"
+                   th:href="@{/admin/users(page=${i}, size=${users.size}, email=${filter.email}, role=${filter.role}, active=${filter.active})}"
+                   th:text="${i + 1}"></a>
+            </li>
+            <li th:class="${users.hasNext()} ? 'page-item' : 'page-item disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/users(page=${users.number + 1}, size=${users.size}, email=${filter.email}, role=${filter.role}, active=${filter.active})}">
+                    &raquo;
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+</div>
+</body>
+</html>
