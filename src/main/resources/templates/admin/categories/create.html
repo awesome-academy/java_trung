@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title th:text="#{admin.categories.create.title}">Create Category</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <a th:href="@{/admin/categories}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i><span th:text="#{admin.categories.create.title}">Create Category</span></h4>
+    </div>
+
+
+    <div class="card shadow-sm border-0" style="max-width: 600px;">
+        <div class="card-body p-4">
+            <form th:action="@{/admin/categories}" th:object="${categoryRequest}" method="post">
+
+                <!-- Name -->
+                <div class="mb-3">
+                    <label class="form-label"><span th:text="#{admin.categories.form.name}">Name</span> <span class="text-danger">*</span></label>
+                    <input type="text" th:field="*{name}"
+                           th:class="${#fields.hasErrors('name')} ? 'form-control is-invalid' : 'form-control'"
+                           th:placeholder="#{admin.categories.form.name.placeholder}"/>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}"
+                         th:errors="*{name}"></div>
+                </div>
+
+                <!-- Classify -->
+                <div class="mb-3">
+                    <label class="form-label"><span th:text="#{admin.categories.form.classify}">Classify</span> <span class="text-danger">*</span></label>
+                    <select th:field="*{classify}"
+                            th:class="${#fields.hasErrors('classify')} ? 'form-select is-invalid' : 'form-select'">
+                        <option value="" th:text="#{admin.categories.form.classify.select}">Select</option>
+                        <option th:each="c : ${classifyOptions}"
+                                th:value="${c.name()}"
+                                th:text="${#messages.msg('admin.classify.' + c.name().toLowerCase())}"></option>
+                    </select>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('classify')}"
+                         th:errors="*{classify}"></div>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-4">
+                    <label class="form-label" th:text="#{admin.categories.form.description}">Description</label>
+                    <textarea th:field="*{description}"
+                              th:class="${#fields.hasErrors('description')} ? 'form-control is-invalid' : 'form-control'"
+                              rows="4" th:placeholder="#{admin.categories.form.description.placeholder}"></textarea>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}"
+                         th:errors="*{description}"></div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-check-lg me-1"></i><span th:text="#{admin.common.create}">Create</span>
+                    </button>
+                    <a th:href="@{/admin/categories}" class="btn btn-outline-secondary px-4" th:text="#{admin.common.cancel}">Cancel</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

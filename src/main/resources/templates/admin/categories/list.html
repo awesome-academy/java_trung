@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title th:text="#{admin.categories.title}">Categories</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0"><i class="bi bi-tags me-2"></i><span th:text="#{admin.categories.title}">Categories</span></h4>
+        <a th:href="@{/admin/categories/create}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i><span th:text="#{admin.categories.create.button}">Create Category</span>
+        </a>
+    </div>
+
+
+    <!-- Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-dark">
+                <tr>
+                    <th class="ps-3">#</th>
+                    <th th:text="#{admin.categories.table.name}">Name</th>
+                    <th th:text="#{admin.categories.table.classify}">Classify</th>
+                    <th th:text="#{admin.categories.table.description}">Description</th>
+                    <th th:text="#{admin.categories.table.createdAt}">Created At</th>
+                    <th class="text-center" th:text="#{admin.categories.table.actions}">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${categories.isEmpty()}">
+                    <td colspan="6" class="text-center text-muted py-4" th:text="#{admin.categories.empty}">No categories found.</td>
+                </tr>
+                <tr th:each="cat, stat : ${categories.content}">
+                    <td class="ps-3" th:text="${categories.number * categories.size + stat.index + 1}"></td>
+                    <td th:text="${cat.name}"></td>
+                    <td>
+                        <span th:class="${cat.classify.name() == 'FOOD'} ? 'badge bg-success' : 'badge bg-info text-dark'"
+                              th:text="${#messages.msg('admin.classify.' + cat.classify.name().toLowerCase())}"></span>
+                    </td>
+                    <td th:text="${cat.description != null ? (cat.description.length() > 60 ? cat.description.substring(0,60) + '…' : cat.description) : '—'}"></td>
+                    <td th:text="${#temporals.format(cat.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td class="text-center">
+                        <a th:href="@{/admin/categories/{id}/edit(id=${cat.id})}"
+                           class="btn btn-sm btn-outline-primary me-1">
+                            <i class="bi bi-pencil"></i> <span th:text="#{admin.common.edit}">Edit</span>
+                        </a>
+                        <form th:action="@{/admin/categories/{id}/delete(id=${cat.id})}"
+                              method="post" class="d-inline"
+                              th:attr="onsubmit=|return confirm('${#messages.msg('admin.categories.delete.confirm')}')|">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i> <span th:text="#{admin.common.delete}">Delete</span>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav th:if="${categories.totalPages > 1}" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li th:class="${categories.hasPrevious()} ? 'page-item' : 'page-item disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/categories(page=${categories.number - 1}, size=${categories.size})}">&laquo;</a>
+            </li>
+            <li th:each="i : ${#numbers.sequence(0, categories.totalPages - 1)}"
+                th:class="${i == categories.number} ? 'page-item active' : 'page-item'">
+                <a class="page-link"
+                   th:href="@{/admin/categories(page=${i}, size=${categories.size})}"
+                   th:text="${i + 1}"></a>
+            </li>
+            <li th:class="${categories.hasNext()} ? 'page-item' : 'page-item disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/categories(page=${categories.number + 1}, size=${categories.size})}">&raquo;</a>
+            </li>
+        </ul>
+    </nav>
+
+</div>
+</body>
+</html>
