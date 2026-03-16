@@ -67,11 +67,7 @@ public class CategoryService {
         if (categoryRepository.existsByNameAndClassify(request.getName(), request.getClassify())) {
             throw new AppException(ErrorCode.CATEGORY_ALREADY_EXISTS);
         }
-        Category category = Category.builder()
-                .name(request.getName())
-                .classify(request.getClassify())
-                .description(request.getDescription())
-                .build();
+        Category category = categoryMapper.toEntity(request);
         return categoryRepository.save(category);
     }
 
@@ -82,9 +78,7 @@ public class CategoryService {
         if (categoryRepository.existsByNameAndClassifyAndIdNot(request.getName(), request.getClassify(), id)) {
             throw new AppException(ErrorCode.CATEGORY_ALREADY_EXISTS);
         }
-        category.setName(request.getName());
-        category.setClassify(request.getClassify());
-        category.setDescription(request.getDescription());
+        categoryMapper.updateEntity(request, category);
         return categoryRepository.save(category);
     }
 

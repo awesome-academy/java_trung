@@ -4,6 +4,7 @@ import com.example.foodsdrinks.config.MessageHelper;
 import com.example.foodsdrinks.dto.request.CategoryRequest;
 import com.example.foodsdrinks.entity.Category;
 import com.example.foodsdrinks.entity.enums.Classify;
+import com.example.foodsdrinks.mapper.CategoryMapper;
 import com.example.foodsdrinks.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminCategoryController {
 
     private final CategoryService categoryService;
+    private final CategoryMapper categoryMapper;
     private final MessageHelper messageHelper;
 
     @ModelAttribute("classifyOptions")
@@ -63,10 +65,7 @@ public class AdminCategoryController {
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, Model model) {
         Category category = categoryService.getCategoryEntityById(id);
-        CategoryRequest categoryRequest = new CategoryRequest();
-        categoryRequest.setName(category.getName());
-        categoryRequest.setClassify(category.getClassify());
-        categoryRequest.setDescription(category.getDescription());
+        CategoryRequest categoryRequest = categoryMapper.toRequest(category);
         model.addAttribute("categoryRequest", categoryRequest);
         model.addAttribute("categoryId", id);
         return "admin/categories/edit";
