@@ -1,6 +1,7 @@
 package com.example.foodsdrinks.security;
 
 import com.example.foodsdrinks.entity.User;
+import com.example.foodsdrinks.entity.enums.Role;
 import com.example.foodsdrinks.exception.ErrorCode;
 import com.example.foodsdrinks.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(
                         ErrorCode.INVALID_CREDENTIALS.getMessageKey()));
+
+        if (user.getRole() != Role.ADMIN) {
+            throw new UsernameNotFoundException(ErrorCode.INVALID_CREDENTIALS.getMessageKey());
+        }
 
         return new AdminUserPrincipal(
                 user.getId(),
