@@ -24,11 +24,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(
                         ErrorCode.INVALID_CREDENTIALS.getMessageKey()));
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getId())
-                .password(user.getPassword())
-                .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())))
-                .accountLocked(!user.isActive())
-                .build();
+        return new AdminUserPrincipal(
+                user.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getPassword(),
+                user.isActive(),
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+        );
     }
 }

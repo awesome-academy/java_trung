@@ -2,6 +2,8 @@ package com.example.foodsdrinks.config;
 
 import com.example.foodsdrinks.exception.ErrorCode;
 import com.example.foodsdrinks.exception.ErrorResponse;
+import com.example.foodsdrinks.repository.UserRepository;
+import com.example.foodsdrinks.security.AdminAccountStatusFilter;
 import com.example.foodsdrinks.security.JwtAuthFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,6 +14,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -31,6 +34,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final UserRepository userRepository;
     private final UserDetailsService userDetailsService;
     private final MessageHelper messageHelper;
 
@@ -70,29 +74,37 @@ public class SecurityConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain adminFilterChain(HttpSecurity http) throws Exception {
+        AdminAccountStatusFilter adminAccountStatusFilter = new AdminAccountStatusFilter(userRepository);
         http
-                .securityMatcher("/templates /admin/**")
+                .securityMatcher("/admin/**")
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/templates /admin/login").permitAll()
+                        .requestMatchers("/admin/login").permitAll()
                         .anyRequest().hasRole("ADMIN")
                 )
                 .formLogin(form -> form
-                        .loginPage("/templates /admin/login")
-                        .loginProcessingUrl("/templates /admin/login")
-                        .defaultSuccessUrl("/templates /admin/dashboard", true)
-                        .failureUrl("/templates /admin/login?error=true")
+                        .loginPage("/admin/login")
+                        .loginProcessingUrl("/admin/login")
+                        .defaultSuccessUrl("/admin/dashboard", true)
+                        .failureHandler((request, response, exception) -> {
+                            if (exception instanceof DisabledException) {
+                                response.sendRedirect(request.getContextPath() + "/admin/login?disabled=true");
+                                return;
+                            }
+                            response.sendRedirect(request.getContextPath() + "/admin/login?error=true");
+                        })
                         .usernameParameter("email")
                         .passwordParameter("password")
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/templates /admin/logout")
-                        .logoutSuccessUrl("/templates /admin/login?logout=true")
+                        .logoutUrl("/admin/logout")
+                        .logoutSuccessUrl("/admin/login?logout=true")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                 )
                 .exceptionHandling(ex -> ex
-                        .accessDeniedPage("/templates /admin/login?error=access")
-                );
+                        .accessDeniedPage("/admin/login?error=access")
+                )
+                .addFilterAfter(adminAccountStatusFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -122,8 +134,7 @@ public class SecurityConfig {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
