@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Orders</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0"><i class="bi bi-cart3 me-2"></i>Orders</h4>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form th:action="@{/admin/orders}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small text-muted">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option th:each="s : ${statusOptions}"
+                                th:value="${s.name()}"
+                                th:text="${s.name()}"
+                                th:selected="${filter.status == s}"></option>
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label small text-muted">User (Email / Name)</label>
+                    <input type="text" name="keyword" class="form-control"
+                           th:value="${filter.keyword}" placeholder="Search by email or name..."/>
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-1"></i>Search
+                    </button>
+                    <a th:href="@{/admin/orders}" class="btn btn-outline-secondary w-100">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-dark">
+                <tr>
+                    <th class="ps-3">#</th>
+                    <th>Order ID</th>
+                    <th>User Email</th>
+                    <th>User Name</th>
+                    <th>Total Amount</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${orders.isEmpty()}">
+                    <td colspan="8" class="text-center text-muted py-4">No orders found.</td>
+                </tr>
+                <tr th:each="order, stat : ${orders.content}">
+                    <td class="ps-3" th:text="${orders.number * orders.size + stat.index + 1}"></td>
+                    <td th:text="${order.id}"></td>
+                    <td th:text="${order.user.email}"></td>
+                    <td th:text="${order.user.fullName != null ? order.user.fullName : '—'}"></td>
+                    <td th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}"></td>
+                    <td>
+                        <span th:classappend="${
+                            order.status.name() == 'PENDING'   ? 'bg-warning text-dark' :
+                            order.status.name() == 'CONFIRMED' ? 'bg-primary' :
+                            order.status.name() == 'PREPARING' ? 'bg-info text-dark' :
+                            order.status.name() == 'DELIVERED' ? 'bg-success' :
+                            order.status.name() == 'DONE'      ? 'bg-secondary' :
+                            'bg-danger'}"
+                              class="badge"
+                              th:text="${order.status.name()}"></span>
+                    </td>
+                    <td th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td class="text-center">
+                        <a th:href="@{/admin/orders/{id}(id=${order.id})}"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye me-1"></i>View
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="card-footer bg-white border-0" th:if="${orders.totalPages > 1}">
+            <nav>
+                <ul class="pagination pagination-sm mb-0 justify-content-center">
+                    <li class="page-item" th:classappend="${orders.first ? 'disabled' : ''}">
+                        <a class="page-link"
+                           th:href="@{/admin/orders(page=${orders.number - 1}, size=${orders.size}, status=${filter.status}, keyword=${filter.keyword})}">&laquo;</a>
+                    </li>
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(0, orders.totalPages - 1)}"
+                        th:classappend="${i == orders.number ? 'active' : ''}">
+                        <a class="page-link"
+                           th:href="@{/admin/orders(page=${i}, size=${orders.size}, status=${filter.status}, keyword=${filter.keyword})}"
+                           th:text="${i + 1}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${orders.last ? 'disabled' : ''}">
+                        <a class="page-link"
+                           th:href="@{/admin/orders(page=${orders.number + 1}, size=${orders.size}, status=${filter.status}, keyword=${filter.keyword})}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

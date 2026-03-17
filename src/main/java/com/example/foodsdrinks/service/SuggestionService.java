@@ -5,6 +5,8 @@ import com.example.foodsdrinks.dto.response.SuggestionResponse;
 import com.example.foodsdrinks.entity.Suggestion;
 import com.example.foodsdrinks.entity.User;
 import com.example.foodsdrinks.entity.enums.SuggestionStatus;
+import com.example.foodsdrinks.exception.AppException;
+import com.example.foodsdrinks.exception.ErrorCode;
 import com.example.foodsdrinks.mapper.SuggestionMapper;
 import com.example.foodsdrinks.repository.SuggestionRepository;
 import com.example.foodsdrinks.repository.UserRepository;
@@ -41,5 +43,32 @@ public class SuggestionService {
     @Transactional(readOnly = true)
     public Page<SuggestionResponse> getMySuggestions(String userId, Pageable pageable) {
         return suggestionRepository.findAllByUserId(userId, pageable).map(suggestionMapper::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Suggestion> getSuggestions(SuggestionStatus status, Pageable pageable) {
+        if (status != null) {
+            return suggestionRepository.findAllByStatus(status, pageable);
+        }
+        return suggestionRepository.findAll(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Suggestion getSuggestionDetail(Long id) {
+        return suggestionRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.SUGGESTION_NOT_FOUND));
+    }
+
+    public void approve(Long id) {
+        Suggestion suggestion = suggestionRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.SUGGESTION_NOT_FOUND));
+        suggestion.setStatus(SuggestionStatus.APPROVED);
+    }
+
+    public void reject(Long id, String adminNote) {
+        Suggestion suggestion = suggestionRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.SUGGESTION_NOT_FOUND));
+        suggestion.setStatus(SuggestionStatus.REJECTED);
+        suggestion.setAdminNote(adminNote);
     }
 }

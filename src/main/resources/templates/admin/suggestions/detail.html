@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Suggestion Detail</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0"><i class="bi bi-lightbulb me-2"></i>Suggestion Detail</h4>
+        <a th:href="@{/admin/suggestions}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Back to Suggestions
+        </a>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Suggestion Info -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white">Suggestion Information</div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 text-muted">User Email</dt>
+                        <dd class="col-sm-8" th:text="${suggestion.user.email}"></dd>
+
+                        <dt class="col-sm-4 text-muted">Name</dt>
+                        <dd class="col-sm-8" th:text="${suggestion.name}"></dd>
+
+                        <dt class="col-sm-4 text-muted">Classify</dt>
+                        <dd class="col-sm-8" th:text="${suggestion.classify != null ? suggestion.classify.name() : '—'}"></dd>
+
+                        <dt class="col-sm-4 text-muted">Description</dt>
+                        <dd class="col-sm-8" th:text="${suggestion.description != null ? suggestion.description : '—'}"></dd>
+
+                        <dt class="col-sm-4 text-muted">Status</dt>
+                        <dd class="col-sm-8">
+                            <span th:classappend="${
+                                suggestion.status.name() == 'PENDING'  ? 'bg-warning text-dark' :
+                                suggestion.status.name() == 'APPROVED' ? 'bg-success' :
+                                'bg-danger'}"
+                                  class="badge"
+                                  th:text="${suggestion.status.name()}"></span>
+                        </dd>
+
+                        <dt class="col-sm-4 text-muted">Created At</dt>
+                        <dd class="col-sm-8" th:text="${#temporals.format(suggestion.createdAt, 'dd/MM/yyyy HH:mm')}"></dd>
+
+                        <!-- Admin Note (shown when REJECTED) -->
+                        <th:block th:if="${suggestion.status.name() == 'REJECTED' and suggestion.adminNote != null}">
+                            <dt class="col-sm-4 text-muted">Admin Note</dt>
+                            <dd class="col-sm-8" th:text="${suggestion.adminNote}"></dd>
+                        </th:block>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Panel (only for PENDING) -->
+        <div class="col-lg-6" th:if="${suggestion.status.name() == 'PENDING'}">
+
+            <!-- Approve -->
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-header bg-success text-white">Approve Suggestion</div>
+                <div class="card-body">
+                    <p class="text-muted small">Approve this suggestion to mark it as accepted.</p>
+                    <form th:action="@{/admin/suggestions/{id}/approve(id=${suggestion.id})}" method="post">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle me-1"></i>Approve
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Reject -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-danger text-white">Reject Suggestion</div>
+                <div class="card-body">
+                    <form th:action="@{/admin/suggestions/{id}/reject(id=${suggestion.id})}" method="post"
+                          th:object="${rejectRequest}">
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">Admin Note <span class="text-danger">*</span></label>
+                            <textarea th:field="*{adminNote}" rows="4"
+                                      th:classappend="${#fields.hasErrors('adminNote') ? 'is-invalid' : ''}"
+                                      class="form-control"
+                                      placeholder="Provide a reason for rejection..."></textarea>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('adminNote')}"
+                                 th:errors="*{adminNote}"></div>
+                        </div>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-x-circle me-1"></i>Reject
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>
