@@ -55,6 +55,9 @@ public class AdminWebExceptionHandler {
         if (uri.startsWith("/admin/categories")) {
             return "redirect:/admin/categories";
         }
+        if (uri.startsWith("/admin/products")) {
+            return "redirect:/admin/products";
+        }
         if (uri.startsWith("/admin/login")) {
             return "redirect:/admin/login";
         }

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title th:text="#{admin.products.title}">Products</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0"><i class="bi bi-box-seam me-2"></i><span th:text="#{admin.products.title}">Products</span></h4>
+        <a th:href="@{/admin/products/create}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i><span th:text="#{admin.products.create.button}">Create Product</span>
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form th:action="@{/admin/products}" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label" th:text="#{admin.products.filter.search}">Search</label>
+                    <input type="text" name="search" class="form-control"
+                           th:value="${filter.search}" th:placeholder="#{admin.products.filter.search.placeholder}"/>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" th:text="#{admin.products.filter.category}">Category</label>
+                    <select name="categoryId" class="form-select">
+                        <option value="" th:text="#{admin.products.filter.category.all}">All Categories</option>
+                        <option th:each="c : ${categories}"
+                                th:value="${c.id}"
+                                th:selected="${filter.categoryId != null and filter.categoryId == c.id}"
+                                th:text="${c.name}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" th:text="#{admin.products.filter.classify}">Classify</label>
+                    <select name="classify" class="form-select">
+                        <option value="" th:text="#{admin.products.filter.classify.all}">All Classify</option>
+                        <option th:each="c : ${classifyOptions}"
+                                th:value="${c.name()}"
+                                th:selected="${filter.classify != null and filter.classify == c}"
+                                th:text="${#messages.msg('admin.classify.' + c.name().toLowerCase())}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" th:text="#{admin.products.filter.minPrice}">Min Price</label>
+                    <input id="minPriceInput" type="number" name="minPrice" class="form-control"
+                           min="0" step="0.01" th:value="${filter.minPrice}"/>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" th:text="#{admin.products.filter.maxPrice}">Max Price</label>
+                    <input id="maxPriceInput" type="number" name="maxPrice" class="form-control"
+                           min="0" step="0.01" th:value="${filter.maxPrice}"/>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" th:text="#{admin.products.filter.available}">Availability</label>
+                    <select name="available" class="form-select">
+                        <option value="" th:text="#{admin.products.filter.available.all}">All Availability</option>
+                        <option value="true" th:selected="${filter.available != null and filter.available}" th:text="#{admin.products.filter.available.true}">Available</option>
+                        <option value="false" th:selected="${filter.available != null and !filter.available}" th:text="#{admin.products.filter.available.false}">Unavailable</option>
+                    </select>
+                </div>
+                <div class="col-12 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search me-1"></i><span th:text="#{admin.common.search}">Search</span>
+                    </button>
+                    <a th:href="@{/admin/products}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise me-1"></i><span th:text="#{admin.common.reset}">Reset</span>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-dark">
+                <tr>
+                    <th class="ps-3">#</th>
+                    <th th:text="#{admin.products.table.image}">Image</th>
+                    <th th:text="#{admin.products.table.name}">Name</th>
+                    <th th:text="#{admin.products.table.category}">Category</th>
+                    <th th:text="#{admin.products.table.classify}">Classify</th>
+                    <th th:text="#{admin.products.table.price}">Price</th>
+                    <th th:text="#{admin.products.table.stock}">Stock</th>
+                    <th th:text="#{admin.products.table.available}">Available</th>
+                    <th class="text-center" th:text="#{admin.products.table.actions}">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${products.isEmpty()}">
+                    <td colspan="9" class="text-center text-muted py-4" th:text="#{admin.products.empty}">No products found.</td>
+                </tr>
+                <tr th:each="product, stat : ${products.content}">
+                    <td class="ps-3" th:text="${products.number * products.size + stat.index + 1}"></td>
+                    <td>
+                        <img th:src="${product.imageUrl}" alt="product"
+                             class="rounded border" style="width: 50px; height: 50px; object-fit: cover;"/>
+                    </td>
+                    <td th:text="${product.name}"></td>
+                    <td th:text="${product.category.name}"></td>
+                    <td>
+                        <span th:class="${product.classify.name() == 'FOOD' ? 'badge bg-success' : 'badge bg-info text-dark'}"
+                              th:text="${#messages.msg('admin.classify.' + product.classify.name().toLowerCase())}"></span>
+                    </td>
+                    <td th:text="${#numbers.formatDecimal(product.price, 1, 2)}"></td>
+                    <td th:text="${product.stock}"></td>
+                    <td>
+                        <span th:class="${product.available ? 'badge bg-success' : 'badge bg-secondary'}"
+                              th:text="${product.available ? #messages.msg('admin.products.available.yes') : #messages.msg('admin.products.available.no')}"></span>
+                    </td>
+                    <td class="text-center">
+                        <a th:href="@{/admin/products/{id}/edit(id=${product.id})}" class="btn btn-sm btn-outline-primary me-1">
+                            <i class="bi bi-pencil"></i> <span th:text="#{admin.common.edit}">Edit</span>
+                        </a>
+                        <form th:action="@{/admin/products/{id}/toggle-available(id=${product.id})}" method="post" class="d-inline me-1">
+                            <button type="submit" class="btn btn-sm btn-outline-warning">
+                                <i class="bi bi-arrow-repeat"></i> <span th:text="#{admin.products.action.toggle}">Toggle Availability</span>
+                            </button>
+                        </form>
+                        <form th:action="@{/admin/products/{id}/delete(id=${product.id})}" method="post" class="d-inline"
+                              th:attr="onsubmit=|return confirm('${#messages.msg('admin.products.delete.confirm')}')|">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i> <span th:text="#{admin.common.delete}">Delete</span>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <nav th:if="${products.totalPages > 1}" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li th:class="${products.hasPrevious() ? 'page-item' : 'page-item disabled'}">
+                <a class="page-link"
+                   th:href="@{/admin/products(page=${products.number - 1},size=${products.size},search=${filter.search},categoryId=${filter.categoryId},classify=${filter.classify},minPrice=${filter.minPrice},maxPrice=${filter.maxPrice},available=${filter.available})}">&laquo;</a>
+            </li>
+            <li th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}"
+                th:class="${i == products.number ? 'page-item active' : 'page-item'}">
+                <a class="page-link"
+                   th:href="@{/admin/products(page=${i},size=${products.size},search=${filter.search},categoryId=${filter.categoryId},classify=${filter.classify},minPrice=${filter.minPrice},maxPrice=${filter.maxPrice},available=${filter.available})}"
+                   th:text="${i + 1}"></a>
+            </li>
+            <li th:class="${products.hasNext() ? 'page-item' : 'page-item disabled'}">
+                <a class="page-link"
+                   th:href="@{/admin/products(page=${products.number + 1},size=${products.size},search=${filter.search},categoryId=${filter.categoryId},classify=${filter.classify},minPrice=${filter.minPrice},maxPrice=${filter.maxPrice},available=${filter.available})}">&raquo;</a>
+            </li>
+        </ul>
+    </nav>
+
+</div>
+<th:block layout:fragment="pageScripts">
+    <script th:src="@{/js/admin/products/list.js}" defer></script>
+</th:block>
+</body>
+</html>

@@ -15,4 +15,6 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 
     Optional<OrderItem> findFirstByOrderUserIdAndProductIdAndOrderStatus(
             String userId, Long productId, OrderStatus status);
+
+    boolean existsByProductId(Long productId);
 }

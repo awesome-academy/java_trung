@@ -24,6 +24,7 @@ public enum ErrorCode {
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "error.product.not.found"),
     PRODUCT_UNAVAILABLE(HttpStatus.BAD_REQUEST, "error.product.unavailable"),
     INSUFFICIENT_STOCK(HttpStatus.BAD_REQUEST, "error.insufficient.stock"),
+    PRODUCT_HAS_ORDERS(HttpStatus.CONFLICT, "error.product.has.orders"),
 
     CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "error.cart.item.not.found"),
     CART_EMPTY(HttpStatus.BAD_REQUEST, "error.cart.empty"),
@@ -45,7 +46,9 @@ public enum ErrorCode {
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "error.method.not.allowed"),
 
     INVALID_PRICE_RANGE(HttpStatus.BAD_REQUEST, "error.invalid.price.range"),
-    INVALID_ENUM_VALUE(HttpStatus.BAD_REQUEST, "error.invalid.enum.value");
+    INVALID_ENUM_VALUE(HttpStatus.BAD_REQUEST, "error.invalid.enum.value"),
+    INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "error.invalid.file.type"),
+    FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "error.file.upload.failed");
 
     private final HttpStatus status;
     private final String messageKey;
