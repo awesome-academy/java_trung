@@ -6,7 +6,6 @@ import com.example.foodsdrinks.dto.request.UpdateOrderStatusRequest;
 import com.example.foodsdrinks.entity.Order;
 import com.example.foodsdrinks.entity.enums.OrderStatus;
 import com.example.foodsdrinks.service.OrderService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,7 +49,7 @@ public class AdminOrderController {
     @PostMapping("/{id}/status")
     public String updateStatus(
             @PathVariable Long id,
-            @Valid @ModelAttribute UpdateOrderStatusRequest request,
+            @ModelAttribute UpdateOrderStatusRequest request,
             RedirectAttributes redirectAttributes) {
         orderService.adminUpdateStatus(id, request.getStatus());
         redirectAttributes.addFlashAttribute("successMessage",

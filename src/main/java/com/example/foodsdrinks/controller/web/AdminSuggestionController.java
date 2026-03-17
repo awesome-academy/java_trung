@@ -63,13 +63,16 @@ public class AdminSuggestionController {
             @PathVariable Long id,
             @Valid @ModelAttribute("rejectRequest") RejectSuggestionRequest rejectRequest,
             BindingResult bindingResult,
-            Model model) {
+            Model model,
+            RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             Suggestion suggestion = suggestionService.getSuggestionDetail(id);
             model.addAttribute("suggestion", suggestion);
             return "admin/suggestions/detail";
         }
         suggestionService.reject(id, rejectRequest.getAdminNote());
+        redirectAttributes.addFlashAttribute("successMessage",
+                messageHelper.get("success.admin.suggestion.rejected"));
         return "redirect:/admin/suggestions/" + id;
     }
 }
