@@ -4,13 +4,13 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{admin/layout}">
 <head>
-    <title>Orders</title>
+    <title th:text="#{admin.orders.title}">Orders</title>
 </head>
 <body>
 <div layout:fragment="content">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0"><i class="bi bi-cart3 me-2"></i>Orders</h4>
+        <h4 class="mb-0"><i class="bi bi-cart3 me-2"></i><span th:text="#{admin.orders.title}">Orders</span></h4>
     </div>
 
     <!-- Filter Form -->
@@ -18,9 +18,9 @@
         <div class="card-body">
             <form th:action="@{/admin/orders}" method="get" class="row g-3 align-items-end">
                 <div class="col-md-3">
-                    <label class="form-label small text-muted">Status</label>
+                    <label class="form-label small text-muted" th:text="#{admin.orders.filter.status}">Status</label>
                     <select name="status" class="form-select">
-                        <option value="">All Statuses</option>
+                        <option value="" th:text="#{admin.orders.filter.status.all}">All Statuses</option>
                         <option th:each="s : ${statusOptions}"
                                 th:value="${s.name()}"
                                 th:text="${s.name()}"
@@ -28,15 +28,15 @@
                     </select>
                 </div>
                 <div class="col-md-5">
-                    <label class="form-label small text-muted">User (Email / Name)</label>
+                    <label class="form-label small text-muted" th:text="#{admin.orders.filter.keyword}">User (Email / Name)</label>
                     <input type="text" name="keyword" class="form-control"
-                           th:value="${filter.keyword}" placeholder="Search by email or name..."/>
+                           th:value="${filter.keyword}" th:placeholder="#{admin.orders.filter.keyword.placeholder}"/>
                 </div>
                 <div class="col-md-4 d-flex gap-2">
                     <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-search me-1"></i>Search
+                        <i class="bi bi-search me-1"></i><span th:text="#{admin.common.search}">Search</span>
                     </button>
-                    <a th:href="@{/admin/orders}" class="btn btn-outline-secondary w-100">Reset</a>
+                    <a th:href="@{/admin/orders}" class="btn btn-outline-secondary w-100" th:text="#{admin.common.reset}">Reset</a>
                 </div>
             </form>
         </div>
@@ -49,18 +49,18 @@
                 <thead class="table-dark">
                 <tr>
                     <th class="ps-3">#</th>
-                    <th>Order ID</th>
-                    <th>User Email</th>
-                    <th>User Name</th>
-                    <th>Total Amount</th>
-                    <th>Status</th>
-                    <th>Created At</th>
-                    <th class="text-center">Actions</th>
+                    <th th:text="#{admin.orders.table.orderId}">Order ID</th>
+                    <th th:text="#{admin.orders.table.userEmail}">User Email</th>
+                    <th th:text="#{admin.orders.table.userName}">User Name</th>
+                    <th th:text="#{admin.orders.table.totalAmount}">Total Amount</th>
+                    <th th:text="#{admin.orders.table.status}">Status</th>
+                    <th th:text="#{admin.orders.table.createdAt}">Created At</th>
+                    <th class="text-center" th:text="#{admin.orders.table.actions}">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:if="${orders.isEmpty()}">
-                    <td colspan="8" class="text-center text-muted py-4">No orders found.</td>
+                    <td colspan="8" class="text-center text-muted py-4" th:text="#{admin.orders.empty}">No orders found.</td>
                 </tr>
                 <tr th:each="order, stat : ${orders.content}">
                     <td class="ps-3" th:text="${orders.number * orders.size + stat.index + 1}"></td>
@@ -83,7 +83,7 @@
                     <td class="text-center">
                         <a th:href="@{/admin/orders/{id}(id=${order.id})}"
                            class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-eye me-1"></i>View
+                            <i class="bi bi-eye me-1"></i><span th:text="#{admin.orders.action.view}">View</span>
                         </a>
                     </td>
                 </tr>

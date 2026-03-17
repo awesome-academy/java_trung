@@ -4,13 +4,13 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{admin/layout}">
 <head>
-    <title>Suggestions</title>
+    <title th:text="#{admin.suggestions.title}">Suggestions</title>
 </head>
 <body>
 <div layout:fragment="content">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0"><i class="bi bi-lightbulb me-2"></i>Suggestions</h4>
+        <h4 class="mb-0"><i class="bi bi-lightbulb me-2"></i><span th:text="#{admin.suggestions.title}">Suggestions</span></h4>
     </div>
 
     <!-- Filter Form -->
@@ -18,9 +18,9 @@
         <div class="card-body">
             <form th:action="@{/admin/suggestions}" method="get" class="row g-3 align-items-end">
                 <div class="col-md-4">
-                    <label class="form-label small text-muted">Status</label>
+                    <label class="form-label small text-muted" th:text="#{admin.suggestions.filter.status}">Status</label>
                     <select name="status" class="form-select">
-                        <option value="" th:selected="${selectedStatus == null}">All Statuses</option>
+                        <option value="" th:selected="${selectedStatus == null}" th:text="#{admin.suggestions.filter.status.all}">All Statuses</option>
                         <option th:each="s : ${statusOptions}"
                                 th:value="${s.name()}"
                                 th:text="${s.name()}"
@@ -29,9 +29,9 @@
                 </div>
                 <div class="col-md-4 d-flex gap-2">
                     <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-search me-1"></i>Search
+                        <i class="bi bi-search me-1"></i><span th:text="#{admin.common.search}">Search</span>
                     </button>
-                    <a th:href="@{/admin/suggestions}" class="btn btn-outline-secondary w-100">Reset</a>
+                    <a th:href="@{/admin/suggestions}" class="btn btn-outline-secondary w-100" th:text="#{admin.common.reset}">Reset</a>
                 </div>
             </form>
         </div>
@@ -44,17 +44,17 @@
                 <thead class="table-dark">
                 <tr>
                     <th class="ps-3">#</th>
-                    <th>User Email</th>
-                    <th>Name</th>
-                    <th>Classify</th>
-                    <th>Status</th>
-                    <th>Created At</th>
-                    <th class="text-center">Actions</th>
+                    <th th:text="#{admin.suggestions.table.userEmail}">User Email</th>
+                    <th th:text="#{admin.suggestions.table.name}">Name</th>
+                    <th th:text="#{admin.suggestions.table.classify}">Classify</th>
+                    <th th:text="#{admin.suggestions.table.status}">Status</th>
+                    <th th:text="#{admin.suggestions.table.createdAt}">Created At</th>
+                    <th class="text-center" th:text="#{admin.suggestions.table.actions}">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:if="${suggestions.isEmpty()}">
-                    <td colspan="7" class="text-center text-muted py-4">No suggestions found.</td>
+                    <td colspan="7" class="text-center text-muted py-4" th:text="#{admin.suggestions.empty}">No suggestions found.</td>
                 </tr>
                 <tr th:each="suggestion, stat : ${suggestions.content}">
                     <td class="ps-3" th:text="${suggestions.number * suggestions.size + stat.index + 1}"></td>
@@ -73,7 +73,7 @@
                     <td class="text-center">
                         <a th:href="@{/admin/suggestions/{id}(id=${suggestion.id})}"
                            class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-eye me-1"></i>View
+                            <i class="bi bi-eye me-1"></i><span th:text="#{admin.suggestions.action.view}">View</span>
                         </a>
                     </td>
                 </tr>
