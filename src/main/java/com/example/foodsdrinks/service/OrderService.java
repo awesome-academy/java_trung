@@ -5,6 +5,7 @@ import com.example.foodsdrinks.dto.request.OrderFilterRequest;
 import com.example.foodsdrinks.dto.request.UpdateOrderStatusRequest;
 import com.example.foodsdrinks.dto.response.OrderResponse;
 import com.example.foodsdrinks.dto.response.OrderSummaryResponse;
+import com.example.foodsdrinks.event.OrderCreatedEvent;
 import com.example.foodsdrinks.specification.OrderSpecification;
 import com.example.foodsdrinks.entity.CartItem;
 import com.example.foodsdrinks.entity.Order;
@@ -21,6 +22,7 @@ import com.example.foodsdrinks.repository.OrderRepository;
 import com.example.foodsdrinks.repository.ProductRepository;
 import com.example.foodsdrinks.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -44,8 +46,7 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final OrderMapper orderMapper;
-    private final SlackService slackService;
-    private final MailService mailService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public OrderResponse createOrder(String userId, CreateOrderRequest request) {
         List<CartItem> cartItems = cartItemRepository.findAllByUserId(userId);
@@ -105,11 +106,10 @@ public class OrderService {
 
         cartItemRepository.deleteAllByUserId(userId);
 
-        // Send notifications (runs on virtual thread — non-blocking)
+        // Collect admin emails and publish event — listener fires after transaction commits (synchronous)
         List<String> adminEmails = userRepository.findAllByRole(Role.ADMIN)
                 .stream().map(User::getEmail).toList();
-        slackService.sendOrderNotification(savedOrder);
-        mailService.sendOrderNotificationToAdmins(savedOrder, adminEmails);
+        eventPublisher.publishEvent(new OrderCreatedEvent(savedOrder, adminEmails));
 
         return orderMapper.toResponse(savedOrder);
     }
