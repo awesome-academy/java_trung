@@ -123,7 +123,7 @@ public class OrderService {
     }
 
     public OrderResponse updateStatus(String userId, Long orderId, UpdateOrderStatusRequest request) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        Order order = orderRepository.findWithItemsById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         if (!order.getUser().getId().equals(userId)) {
             throw new AppException(ErrorCode.ORDER_ACCESS_DENIED);

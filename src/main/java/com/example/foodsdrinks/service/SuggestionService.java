@@ -62,12 +62,18 @@ public class SuggestionService {
     public void approve(Long id) {
         Suggestion suggestion = suggestionRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.SUGGESTION_NOT_FOUND));
+        if (suggestion.getStatus() != SuggestionStatus.PENDING) {
+            throw new AppException(ErrorCode.SUGGESTION_INVALID_STATUS_TRANSITION);
+        }
         suggestion.setStatus(SuggestionStatus.APPROVED);
     }
 
     public void reject(Long id, String adminNote) {
         Suggestion suggestion = suggestionRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.SUGGESTION_NOT_FOUND));
+        if (suggestion.getStatus() != SuggestionStatus.PENDING) {
+            throw new AppException(ErrorCode.SUGGESTION_INVALID_STATUS_TRANSITION);
+        }
         suggestion.setStatus(SuggestionStatus.REJECTED);
         suggestion.setAdminNote(adminNote);
     }
