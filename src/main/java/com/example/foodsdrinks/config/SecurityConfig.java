@@ -113,15 +113,16 @@ public class SecurityConfig {
     @Order(3)
     public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher(
-                        "/swagger-ui/**",
-                        "/swagger-ui.html",
-                        "/api-docs/**",
-                        "/error"
-                )
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/api-docs/**",
+                                "/error",
+                                "/uploads/**"
+                        ).permitAll()
+                        .anyRequest().authenticated()
                 );
 
         return http.build();

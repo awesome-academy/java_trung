@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title th:text="#{admin.products.edit.title}">Edit Product</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <a th:href="@{/admin/products}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <h4 class="mb-0"><i class="bi bi-pencil-square me-2"></i><span th:text="#{admin.products.edit.title}">Edit Product</span></h4>
+    </div>
+
+    <div class="card shadow-sm border-0" style="max-width: 760px;">
+        <div class="card-body p-4">
+            <form th:action="@{/admin/products/{id}/edit(id=${productId})}" th:object="${productRequest}" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label"><span th:text="#{admin.products.form.name}">Name</span> <span class="text-danger">*</span></label>
+                    <input type="text" th:field="*{name}" th:placeholder="#{admin.products.form.name.placeholder}"
+                           th:class="${#fields.hasErrors('name') ? 'form-control is-invalid' : 'form-control'}"/>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" th:text="#{admin.products.form.description}">Description</label>
+                    <textarea rows="4" th:field="*{description}" th:placeholder="#{admin.products.form.description.placeholder}"
+                              th:class="${#fields.hasErrors('description') ? 'form-control is-invalid' : 'form-control'}"></textarea>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label"><span th:text="#{admin.products.form.price}">Price</span> <span class="text-danger">*</span></label>
+                        <input type="number" min="0" step="0.01" th:field="*{price}"
+                               th:class="${#fields.hasErrors('price') ? 'form-control is-invalid' : 'form-control'}"/>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><span th:text="#{admin.products.form.stock}">Stock</span> <span class="text-danger">*</span></label>
+                        <input type="number" min="0" step="1" th:field="*{stock}"
+                               th:class="${#fields.hasErrors('stock') ? 'form-control is-invalid' : 'form-control'}"/>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}"></div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-1">
+                    <div class="col-md-6">
+                        <label class="form-label"><span th:text="#{admin.products.form.category}">Category</span> <span class="text-danger">*</span></label>
+                        <select th:field="*{categoryId}" th:class="${#fields.hasErrors('categoryId') ? 'form-select is-invalid' : 'form-select'}">
+                            <option value="" th:text="#{admin.products.form.category.select}">Select</option>
+                            <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                        </select>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><span th:text="#{admin.products.form.classify}">Classify</span> <span class="text-danger">*</span></label>
+                        <select th:field="*{classify}" th:class="${#fields.hasErrors('classify') ? 'form-select is-invalid' : 'form-select'}">
+                            <option value="" th:text="#{admin.products.form.classify.select}">Select</option>
+                            <option th:each="c : ${classifyOptions}" th:value="${c.name()}"
+                                    th:text="${#messages.msg('admin.classify.' + c.name().toLowerCase())}"></option>
+                        </select>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('classify')}" th:errors="*{classify}"></div>
+                    </div>
+                </div>
+
+                <div class="form-check mt-3 mb-3">
+                    <input class="form-check-input" type="checkbox" th:field="*{available}" id="availableCheckEdit"/>
+                    <label class="form-check-label" for="availableCheckEdit" th:text="#{admin.products.form.available}">Available</label>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label d-block" th:text="#{admin.products.form.image}">Image</label>
+                    <img id="imagePreview" th:src="${currentImageUrl}" alt="current-image"
+                         th:attr="data-initial-src=${currentImageUrl}"
+                         class="mb-3 rounded border" style="width: 120px; height: 120px; object-fit: cover;"/>
+                    <input id="imageFileInput" type="file" th:field="*{imageFile}" accept=".jpg,.jpeg,.png,.webp"
+                           th:class="${#fields.hasErrors('imageFile') ? 'form-control is-invalid' : 'form-control'}"/>
+                    <div class="form-text" th:text="#{admin.products.form.image.hint}">Supported formats: jpg, jpeg, png, webp</div>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('imageFile')}" th:errors="*{imageFile}"></div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-check-lg me-1"></i><span th:text="#{admin.common.saveChanges}">Save Changes</span>
+                    </button>
+                    <a th:href="@{/admin/products}" class="btn btn-outline-secondary px-4" th:text="#{admin.common.cancel}">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<th:block layout:fragment="pageScripts">
+    <script th:src="@{/js/admin/products/image-preview.js}" defer></script>
+</th:block>
+</body>
+</html>
