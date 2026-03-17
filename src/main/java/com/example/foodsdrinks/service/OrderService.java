@@ -12,6 +12,7 @@ import com.example.foodsdrinks.entity.OrderItem;
 import com.example.foodsdrinks.entity.Product;
 import com.example.foodsdrinks.entity.User;
 import com.example.foodsdrinks.entity.enums.OrderStatus;
+import com.example.foodsdrinks.entity.enums.Role;
 import com.example.foodsdrinks.exception.AppException;
 import com.example.foodsdrinks.exception.ErrorCode;
 import com.example.foodsdrinks.mapper.OrderMapper;
@@ -43,6 +44,8 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final OrderMapper orderMapper;
+    private final SlackService slackService;
+    private final MailService mailService;
 
     public OrderResponse createOrder(String userId, CreateOrderRequest request) {
         List<CartItem> cartItems = cartItemRepository.findAllByUserId(userId);
@@ -101,6 +104,12 @@ public class OrderService {
         Order savedOrder = orderRepository.save(order);
 
         cartItemRepository.deleteAllByUserId(userId);
+
+        // Send notifications (runs on virtual thread — non-blocking)
+        List<String> adminEmails = userRepository.findAllByRole(Role.ADMIN)
+                .stream().map(User::getEmail).toList();
+        slackService.sendOrderNotification(savedOrder);
+        mailService.sendOrderNotificationToAdmins(savedOrder, adminEmails);
 
         return orderMapper.toResponse(savedOrder);
     }

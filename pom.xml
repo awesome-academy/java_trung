@@ -33,6 +33,7 @@
 		<springdoc.version>2.8.5</springdoc.version>
 		<lombok.version>1.18.38</lombok.version>
 		<hibernate.version>6.6.42.Final</hibernate.version>
+		<greenmail.version>2.1.2</greenmail.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -131,6 +132,13 @@
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>${springdoc.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.icegreen</groupId>
+			<artifactId>greenmail-spring-boot-starter</artifactId>
+			<version>${greenmail.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 
 	</dependencies>
