@@ -7,7 +7,6 @@ import com.example.foodsdrinks.entity.Category;
 import com.example.foodsdrinks.entity.Product;
 import com.example.foodsdrinks.entity.enums.Classify;
 import com.example.foodsdrinks.mapper.ProductMapper;
-import com.example.foodsdrinks.repository.CategoryRepository;
 import com.example.foodsdrinks.service.AdminProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +32,6 @@ import java.util.List;
 public class AdminProductController {
 
     private final AdminProductService adminProductService;
-    private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
     private final MessageHelper messageHelper;
 
@@ -44,7 +42,7 @@ public class AdminProductController {
 
     @ModelAttribute("categories")
     public List<Category> categories() {
-        return categoryRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
+        return adminProductService.getCategories();
     }
 
     @GetMapping

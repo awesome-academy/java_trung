@@ -14,10 +14,13 @@ import com.example.foodsdrinks.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +34,11 @@ public class AdminProductService {
     private final OrderItemRepository orderItemRepository;
     private final FileStorageService fileStorageService;
     private final ProductMapper productMapper;
+
+    @Transactional(readOnly = true)
+    public List<Category> getCategories() {
+        return categoryRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
+    }
 
     @Transactional(readOnly = true)
     public Page<Product> getProducts(ProductFilterRequest filter, Pageable pageable) {

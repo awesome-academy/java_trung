@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.Set;
 import java.util.UUID;
 
@@ -40,7 +39,7 @@ public class FileStorageService {
 
         try {
             Files.createDirectories(productUploadPath);
-            Files.copy(file.getInputStream(), productUploadPath.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
+            file.transferTo(productUploadPath.resolve(filename));
             return "/uploads/products/" + filename;
         } catch (IOException exception) {
             throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
