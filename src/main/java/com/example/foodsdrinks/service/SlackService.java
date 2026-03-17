@@ -15,17 +15,9 @@ public class SlackService {
     @Value("${app.slack.webhook-url}")
     private String webhookUrl;
 
-    @Value("${app.slack.enabled:false}")
-    private boolean enabled;
-
     private final RestClient restClient = RestClient.create();
 
     public void sendOrderNotification(Order order) {
-        if (!enabled) {
-            log.debug("Slack notifications disabled — skipping order #{}", order.getId());
-            return;
-        }
-
         String message = String.format(
                 "🛒 New Order #%d%n👤 User: %s%n💰 Total: %s%n📦 Items: %d item(s)%n📍 Address: %s",
                 order.getId(),
