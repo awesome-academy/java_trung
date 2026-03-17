@@ -1,6 +1,7 @@
 package com.example.foodsdrinks.security;
 
 import com.example.foodsdrinks.entity.User;
+import com.example.foodsdrinks.entity.enums.Role;
 import com.example.foodsdrinks.exception.ErrorCode;
 import com.example.foodsdrinks.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +25,17 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(
                         ErrorCode.INVALID_CREDENTIALS.getMessageKey()));
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getId())
-                .password(user.getPassword())
-                .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())))
-                .accountLocked(!user.isActive())
-                .build();
+        if (user.getRole() != Role.ADMIN) {
+            throw new UsernameNotFoundException(ErrorCode.INVALID_CREDENTIALS.getMessageKey());
+        }
+
+        return new AdminUserPrincipal(
+                user.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getPassword(),
+                user.isActive(),
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+        );
     }
 }

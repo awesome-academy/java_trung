@@ -15,6 +15,7 @@ public enum ErrorCode {
     FORBIDDEN(HttpStatus.FORBIDDEN, "error.forbidden"),
 
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "error.user.not.found"),
+    CURRENT_USER_CANNOT_BE_DISABLED(HttpStatus.BAD_REQUEST, "error.current.user.cannot.be.disabled"),
 
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "error.category.not.found"),
     CATEGORY_ALREADY_EXISTS(HttpStatus.CONFLICT, "error.category.already.exists"),
