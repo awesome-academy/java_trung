@@ -1,10 +1,12 @@
 package com.example.foodsdrinks.service;
 
+import com.example.foodsdrinks.dto.notification.OrderNotificationData;
 import com.example.foodsdrinks.dto.request.CreateOrderRequest;
 import com.example.foodsdrinks.dto.request.OrderFilterRequest;
 import com.example.foodsdrinks.dto.request.UpdateOrderStatusRequest;
 import com.example.foodsdrinks.dto.response.OrderResponse;
 import com.example.foodsdrinks.dto.response.OrderSummaryResponse;
+import com.example.foodsdrinks.event.OrderCreatedEvent;
 import com.example.foodsdrinks.specification.OrderSpecification;
 import com.example.foodsdrinks.entity.CartItem;
 import com.example.foodsdrinks.entity.Order;
@@ -12,6 +14,7 @@ import com.example.foodsdrinks.entity.OrderItem;
 import com.example.foodsdrinks.entity.Product;
 import com.example.foodsdrinks.entity.User;
 import com.example.foodsdrinks.entity.enums.OrderStatus;
+import com.example.foodsdrinks.entity.enums.Role;
 import com.example.foodsdrinks.exception.AppException;
 import com.example.foodsdrinks.exception.ErrorCode;
 import com.example.foodsdrinks.mapper.OrderMapper;
@@ -20,6 +23,7 @@ import com.example.foodsdrinks.repository.OrderRepository;
 import com.example.foodsdrinks.repository.ProductRepository;
 import com.example.foodsdrinks.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -43,6 +47,7 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final OrderMapper orderMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     public OrderResponse createOrder(String userId, CreateOrderRequest request) {
         List<CartItem> cartItems = cartItemRepository.findAllByUserId(userId);
@@ -101,6 +106,26 @@ public class OrderService {
         Order savedOrder = orderRepository.save(order);
 
         cartItemRepository.deleteAllByUserId(userId);
+
+        List<String> adminEmails = userRepository.findAllByRoleAndActiveTrue(Role.ADMIN)
+                .stream().map(User::getEmail).toList();
+        List<OrderNotificationData.Item> notificationItems = savedOrder.getOrderItems().stream()
+                .map(item -> new OrderNotificationData.Item(
+                        item.getProduct().getName(),
+                        item.getQuantity(),
+                        item.getUnitPrice(),
+                        item.getSubtotal()
+                ))
+                .toList();
+        OrderNotificationData orderData = new OrderNotificationData(
+                savedOrder.getId(),
+                savedOrder.getUser().getEmail(),
+                savedOrder.getTotalAmount(),
+                savedOrder.getDeliveryAddress(),
+                savedOrder.getCreatedAt(),
+                notificationItems
+        );
+        eventPublisher.publishEvent(new OrderCreatedEvent(orderData, adminEmails));
 
         return orderMapper.toResponse(savedOrder);
     }
