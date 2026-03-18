@@ -27,8 +27,8 @@ public class OrderNotificationListener {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onOrderCreated(OrderCreatedEvent event) {
-        log.debug("Sending notifications for order #{}", event.order().getId());
-        slackService.sendOrderNotification(event.order());
-        mailService.sendOrderNotificationToAdmins(event.order(), event.adminEmails());
+        log.debug("Sending notifications for order #{}", event.orderData().orderId());
+        slackService.sendOrderNotification(event.orderData());
+        mailService.sendOrderNotificationToAdmins(event.orderData(), event.adminEmails());
     }
 }

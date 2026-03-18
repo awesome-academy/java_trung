@@ -1,5 +1,6 @@
 package com.example.foodsdrinks.service;
 
+import com.example.foodsdrinks.dto.notification.OrderNotificationData;
 import com.example.foodsdrinks.dto.request.CreateOrderRequest;
 import com.example.foodsdrinks.dto.request.OrderFilterRequest;
 import com.example.foodsdrinks.dto.request.UpdateOrderStatusRequest;
@@ -106,10 +107,25 @@ public class OrderService {
 
         cartItemRepository.deleteAllByUserId(userId);
 
-        // Collect admin emails and publish event — listener fires after transaction commits (synchronous)
-        List<String> adminEmails = userRepository.findAllByRole(Role.ADMIN)
+        List<String> adminEmails = userRepository.findAllByRoleAndActiveTrue(Role.ADMIN)
                 .stream().map(User::getEmail).toList();
-        eventPublisher.publishEvent(new OrderCreatedEvent(savedOrder, adminEmails));
+        List<OrderNotificationData.Item> notificationItems = savedOrder.getOrderItems().stream()
+                .map(item -> new OrderNotificationData.Item(
+                        item.getProduct().getName(),
+                        item.getQuantity(),
+                        item.getUnitPrice(),
+                        item.getSubtotal()
+                ))
+                .toList();
+        OrderNotificationData orderData = new OrderNotificationData(
+                savedOrder.getId(),
+                savedOrder.getUser().getEmail(),
+                savedOrder.getTotalAmount(),
+                savedOrder.getDeliveryAddress(),
+                savedOrder.getCreatedAt(),
+                notificationItems
+        );
+        eventPublisher.publishEvent(new OrderCreatedEvent(orderData, adminEmails));
 
         return orderMapper.toResponse(savedOrder);
     }

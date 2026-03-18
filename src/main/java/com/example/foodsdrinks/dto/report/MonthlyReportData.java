@@ -1,4 +1,4 @@
-package com.example.foodsdrinks.dto;
+package com.example.foodsdrinks.dto.report;
 
 import lombok.Builder;
 import lombok.Getter;

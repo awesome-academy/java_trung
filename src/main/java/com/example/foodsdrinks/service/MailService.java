@@ -1,7 +1,8 @@
 package com.example.foodsdrinks.service;
 
-import com.example.foodsdrinks.dto.MonthlyReportData;
-import com.example.foodsdrinks.entity.Order;
+import com.example.foodsdrinks.config.DateTimeFormatterConstants;
+import com.example.foodsdrinks.dto.notification.OrderNotificationData;
+import com.example.foodsdrinks.dto.report.MonthlyReportData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,22 +22,31 @@ public class MailService {
 
     private final JavaMailSender mailSender;
 
-    public void sendOrderNotificationToAdmins(Order order, List<String> adminEmails) {
+    public void sendOrderNotificationToAdmins(OrderNotificationData order, List<String> adminEmails) {
         if (adminEmails == null || adminEmails.isEmpty()) {
-            log.debug("No admin emails provided — skipping order notification mail for order #{}", order.getId());
+            log.debug("No admin emails provided — skipping order notification mail for order #{}", order.orderId());
             return;
         }
 
-        String subject = String.format("New Order #%d - Foods & Drinks", order.getId());
-        String body = String.format(
-                "New order received%nOrder ID: #%d%nUser: %s%nTotal: %s%nItems: %d item(s)%nDelivery Address: %s%nCreated At: %s",
-                order.getId(),
-                order.getUser().getEmail(),
-                order.getTotalAmount(),
-                order.getOrderItems().size(),
-                order.getDeliveryAddress(),
-                order.getCreatedAt()
+        String subject = String.format("New Order #%d - Foods & Drinks", order.orderId());
+
+        StringBuilder bodyBuilder = new StringBuilder();
+        bodyBuilder.append(String.format("New order received%n"));
+        bodyBuilder.append(String.format("Order ID: #%d%n", order.orderId()));
+        bodyBuilder.append(String.format("User: %s%n", order.userEmail()));
+        bodyBuilder.append(String.format("Total: %s%n", order.totalAmount()));
+        bodyBuilder.append(String.format("Delivery Address: %s%n", order.deliveryAddress()));
+        bodyBuilder.append(String.format("Created At: %s%n", order.createdAt().format(DateTimeFormatterConstants.DATE_TIME_FORMATTER)));
+        bodyBuilder.append("\nItems:\n");
+        order.items().forEach(item ->
+                bodyBuilder.append(String.format("  - %s | qty: %d | price: %s | subtotal: %s%n",
+                        item.productName(),
+                        item.quantity(),
+                        item.unitPrice(),
+                        item.subtotal()))
         );
+
+        String body = bodyBuilder.toString();
 
         for (String adminEmail : adminEmails) {
             try {
@@ -46,9 +56,9 @@ public class MailService {
                 message.setSubject(subject);
                 message.setText(body);
                 mailSender.send(message);
-                log.info("Order notification email sent to {} for order #{}", adminEmail, order.getId());
+                log.info("Order notification email sent to {} for order #{}", adminEmail, order.orderId());
             } catch (Exception e) {
-                log.warn("Failed to send order notification email to {} for order #{}: {}", adminEmail, order.getId(), e.getMessage());
+                log.warn("Failed to send order notification email to {} for order #{}: {}", adminEmail, order.orderId(), e.getMessage());
             }
         }
     }
