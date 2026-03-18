@@ -38,6 +38,7 @@ public enum ErrorCode {
     NOT_PURCHASED(HttpStatus.FORBIDDEN, "error.not.purchased"),
 
     SUGGESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "error.suggestion.not.found"),
+    SUGGESTION_INVALID_STATUS_TRANSITION(HttpStatus.CONFLICT, "error.suggestion.invalid.status.transition"),
 
     VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "error.validation.failed"),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "error.internal"),

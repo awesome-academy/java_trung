@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title th:text="#{admin.orders.detail.title}">Order Detail</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0"><i class="bi bi-cart3 me-2"></i><span th:text="#{admin.orders.detail.title}">Order Detail</span> #<span th:text="${order.id}"></span></h4>
+        <a th:href="@{/admin/orders}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i><span th:text="#{admin.orders.detail.back}">Back to Orders</span>
+        </a>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Order Info -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white" th:text="#{admin.orders.detail.info}">Order Information</div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5 text-muted" th:text="#{admin.orders.detail.orderId}">Order ID</dt>
+                        <dd class="col-sm-7" th:text="${order.id}"></dd>
+
+                        <dt class="col-sm-5 text-muted" th:text="#{admin.orders.detail.userEmail}">User Email</dt>
+                        <dd class="col-sm-7" th:text="${order.user.email}"></dd>
+
+                        <dt class="col-sm-5 text-muted" th:text="#{admin.orders.detail.userName}">User Name</dt>
+                        <dd class="col-sm-7" th:text="${order.user.fullName != null ? order.user.fullName : '—'}"></dd>
+
+                        <dt class="col-sm-5 text-muted" th:text="#{admin.orders.detail.totalAmount}">Total Amount</dt>
+                        <dd class="col-sm-7" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}"></dd>
+
+                        <dt class="col-sm-5 text-muted" th:text="#{admin.orders.detail.deliveryAddress}">Delivery Address</dt>
+                        <dd class="col-sm-7" th:text="${order.deliveryAddress != null ? order.deliveryAddress : '—'}"></dd>
+
+                        <dt class="col-sm-5 text-muted" th:text="#{admin.orders.detail.note}">Note</dt>
+                        <dd class="col-sm-7" th:text="${order.note != null ? order.note : '—'}"></dd>
+
+                        <dt class="col-sm-5 text-muted" th:text="#{admin.orders.detail.createdAt}">Created At</dt>
+                        <dd class="col-sm-7" th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}"></dd>
+
+                        <dt class="col-sm-5 text-muted" th:text="#{admin.orders.detail.status}">Status</dt>
+                        <dd class="col-sm-7">
+                            <span th:classappend="${
+                                order.status.name() == 'PENDING'   ? 'bg-warning text-dark' :
+                                order.status.name() == 'CONFIRMED' ? 'bg-primary' :
+                                order.status.name() == 'PREPARING' ? 'bg-info text-dark' :
+                                order.status.name() == 'DELIVERED' ? 'bg-success' :
+                                order.status.name() == 'DONE'      ? 'bg-secondary' :
+                                'bg-danger'}"
+                                  class="badge"
+                                  th:text="${order.status.name()}"></span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Update Status Form -->
+            <div class="card shadow-sm border-0 mt-3"
+                 th:if="${order.status.name() != 'DONE' and order.status.name() != 'CANCELLED'}">
+                <div class="card-header bg-dark text-white" th:text="#{admin.orders.detail.updateStatus}">Update Status</div>
+                <div class="card-body">
+                    <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="d-flex gap-2 align-items-end">
+                        <div class="flex-grow-1">
+                            <label class="form-label small text-muted" th:text="#{admin.orders.detail.newStatus}">New Status</label>
+                            <select name="status" class="form-select">
+                                <!-- PENDING → CONFIRMED, CANCELLED -->
+                                <th:block th:if="${order.status.name() == 'PENDING'}">
+                                    <option value="CONFIRMED">CONFIRMED</option>
+                                    <option value="CANCELLED">CANCELLED</option>
+                                </th:block>
+                                <!-- CONFIRMED → PREPARING, CANCELLED -->
+                                <th:block th:if="${order.status.name() == 'CONFIRMED'}">
+                                    <option value="PREPARING">PREPARING</option>
+                                    <option value="CANCELLED">CANCELLED</option>
+                                </th:block>
+                                <!-- PREPARING → DELIVERED -->
+                                <th:block th:if="${order.status.name() == 'PREPARING'}">
+                                    <option value="DELIVERED">DELIVERED</option>
+                                </th:block>
+                                <!-- DELIVERED → DONE -->
+                                <th:block th:if="${order.status.name() == 'DELIVERED'}">
+                                    <option value="DONE">DONE</option>
+                                </th:block>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary" th:text="#{admin.orders.detail.updateStatus.button}">Update Status</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white" th:text="#{admin.orders.detail.items}">Order Items</div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-secondary">
+                        <tr>
+                            <th class="ps-3" th:text="#{admin.orders.detail.items.product}">Product</th>
+                            <th th:text="#{admin.orders.detail.items.unitPrice}">Unit Price</th>
+                            <th th:text="#{admin.orders.detail.items.quantity}">Quantity</th>
+                            <th th:text="#{admin.orders.detail.items.subtotal}">Subtotal</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${order.orderItems}">
+                            <td class="ps-3" th:text="${item.product.name}"></td>
+                            <td th:text="${#numbers.formatDecimal(item.unitPrice, 1, 'COMMA', 2, 'POINT')}"></td>
+                            <td th:text="${item.quantity}"></td>
+                            <td th:text="${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')}"></td>
+                        </tr>
+                        </tbody>
+                        <tfoot class="table-light">
+                        <tr>
+                            <td colspan="3" class="text-end fw-semibold" th:text="#{admin.orders.detail.items.total}">Total</td>
+                            <td class="fw-bold" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}"></td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,9 +1,11 @@
 package com.example.foodsdrinks.service;
 
 import com.example.foodsdrinks.dto.request.CreateOrderRequest;
+import com.example.foodsdrinks.dto.request.OrderFilterRequest;
 import com.example.foodsdrinks.dto.request.UpdateOrderStatusRequest;
 import com.example.foodsdrinks.dto.response.OrderResponse;
 import com.example.foodsdrinks.dto.response.OrderSummaryResponse;
+import com.example.foodsdrinks.specification.OrderSpecification;
 import com.example.foodsdrinks.entity.CartItem;
 import com.example.foodsdrinks.entity.Order;
 import com.example.foodsdrinks.entity.OrderItem;
@@ -121,7 +123,7 @@ public class OrderService {
     }
 
     public OrderResponse updateStatus(String userId, Long orderId, UpdateOrderStatusRequest request) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        Order order = orderRepository.findWithItemsById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         if (!order.getUser().getId().equals(userId)) {
             throw new AppException(ErrorCode.ORDER_ACCESS_DENIED);
@@ -135,6 +137,44 @@ public class OrderService {
 
         order.setStatus(request.getStatus());
         return orderMapper.toResponse(orderRepository.save(order));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Order> getOrders(OrderFilterRequest filter, Pageable pageable) {
+        var spec = OrderSpecification.filter(filter.getStatus(), filter.getKeyword());
+        return orderRepository.findAll(spec, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Order getOrderDetailForAdmin(Long orderId) {
+        return orderRepository.findWithDetailsById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+    }
+
+    public void adminUpdateStatus(Long orderId, OrderStatus newStatus) {
+        Order order = orderRepository.findWithDetailsById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        validateAdminTransition(order.getStatus(), newStatus);
+
+        if (newStatus == OrderStatus.CANCELLED) {
+            restoreStock(order);
+        }
+
+        order.setStatus(newStatus);
+    }
+
+    private void validateAdminTransition(OrderStatus current, OrderStatus next) {
+        boolean valid = switch (current) {
+            case PENDING   -> next == OrderStatus.CONFIRMED || next == OrderStatus.CANCELLED;
+            case CONFIRMED -> next == OrderStatus.PREPARING || next == OrderStatus.CANCELLED;
+            case PREPARING -> next == OrderStatus.DELIVERED;
+            case DELIVERED -> next == OrderStatus.DONE;
+            default        -> false;
+        };
+        if (!valid) {
+            throw new AppException(ErrorCode.INVALID_STATUS_TRANSITION);
+        }
     }
 
     private void validateUserTransition(OrderStatus current, OrderStatus next) {
