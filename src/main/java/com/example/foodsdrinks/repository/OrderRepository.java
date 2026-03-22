@@ -1,5 +1,7 @@
 package com.example.foodsdrinks.repository;
 
+import com.example.foodsdrinks.dto.projection.MonthlyRevenue;
+import com.example.foodsdrinks.dto.projection.OrderStatusCount;
 import com.example.foodsdrinks.entity.Order;
 import com.example.foodsdrinks.entity.enums.OrderStatus;
 import org.springframework.data.domain.Page;
@@ -54,6 +56,25 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
         AND o.updatedAt < :to
     """)
     BigDecimal sumTotalAmountByStatusAndUpdatedAtBetween(
+            @Param("status") OrderStatus status,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to);
+
+    @Query("SELECT o.status as status, COUNT(o) as count FROM Order o GROUP BY o.status")
+    List<OrderStatusCount> countGroupByStatus();
+
+    @Query("""
+        SELECT year(o.updatedAt)    as year,
+               month(o.updatedAt)   as month,
+               SUM(o.totalAmount)   as revenue
+        FROM Order o
+        WHERE o.status = :status
+          AND o.updatedAt >= :from
+          AND o.updatedAt < :to
+        GROUP BY year(o.updatedAt), month(o.updatedAt)
+        ORDER BY year(o.updatedAt), month(o.updatedAt)
+    """)
+    List<MonthlyRevenue> sumRevenueGroupByMonth(
             @Param("status") OrderStatus status,
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to);

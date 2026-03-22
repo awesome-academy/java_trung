@@ -10,10 +10,14 @@
 <div layout:fragment="content">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0"><i class="bi bi-speedometer2 me-2"></i><span th:text="#{admin.dashboard.title}">Dashboard</span></h4>
+        <h4 class="mb-0">
+            <i class="bi bi-speedometer2 me-2"></i>
+            <span th:text="#{admin.dashboard.title}">Dashboard</span>
+        </h4>
     </div>
 
-    <div class="row g-4">
+    <!-- Welcome card -->
+    <div class="row g-4 mb-4">
         <div class="col-12">
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
@@ -26,6 +30,71 @@
         </div>
     </div>
 
+    <!-- Loading overlay -->
+    <div id="chartsLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Loading chart data…</p>
+    </div>
+
+    <!-- Charts (hidden until data loaded) -->
+    <div id="chartsContainer" class="row g-4" style="display:none!important;">
+
+        <!-- Revenue by month (Line) -->
+        <div class="col-12 col-xl-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-0 pt-3 pb-0">
+                    <h6 class="mb-0 text-muted">
+                        <i class="bi bi-graph-up-arrow me-1 text-primary"></i>Revenue – Last 6 Months
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders by status (Doughnut) -->
+        <div class="col-12 col-xl-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-0 pt-3 pb-0">
+                    <h6 class="mb-0 text-muted">
+                        <i class="bi bi-pie-chart me-1 text-warning"></i>Orders by Status
+                    </h6>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <canvas id="statusChart" style="max-height:260px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 5 products (Bar) -->
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0 pt-3 pb-0">
+                    <h6 class="mb-0 text-muted">
+                        <i class="bi bi-trophy me-1 text-success"></i>Top 5 Best-Selling Products – This Month
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="topProductsChart" height="80"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Error state -->
+    <div id="chartsError" class="alert alert-danger mt-3" style="display:none!important;">
+        <i class="bi bi-exclamation-triangle me-2"></i>Failed to load chart data. Please refresh the page.
+    </div>
+
 </div>
+
+<th:block layout:fragment="pageScripts">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script th:src="@{/js/admin/dashboard/charts.js}"></script>
+</th:block>
 </body>
 </html>

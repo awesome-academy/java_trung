@@ -1,5 +1,6 @@
 package com.example.foodsdrinks.repository;
 
+import com.example.foodsdrinks.dto.projection.TopProductSales;
 import com.example.foodsdrinks.entity.OrderItem;
 import com.example.foodsdrinks.entity.enums.OrderStatus;
 import org.springframework.data.domain.Pageable;
@@ -23,15 +24,16 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     boolean existsByProductId(Long productId);
 
     @Query("""
-        SELECT oi.product.name, SUM(oi.quantity) as totalQty
+        SELECT oi.product.name      as productName,
+               SUM(oi.quantity)     as totalQuantity
         FROM OrderItem oi
         WHERE oi.order.status = :status
         AND oi.order.updatedAt >= :from
         AND oi.order.updatedAt < :to
         GROUP BY oi.product.id, oi.product.name
-        ORDER BY totalQty DESC
+        ORDER BY SUM(oi.quantity) DESC
     """)
-    List<Object[]> findTopProductsByStatusAndPeriod(
+    List<TopProductSales> findTopProductsByStatusAndPeriod(
             @Param("status") OrderStatus status,
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to,

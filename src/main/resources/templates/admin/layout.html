@@ -67,11 +67,11 @@
 </nav>
 
 <!-- Sidebar -->
-<nav class="sidebar d-flex flex-column pt-3">
+<nav class="sidebar d-flex flex-column">
     <ul class="nav flex-column gap-1 px-2">
         <li class="nav-item">
             <a th:href="@{/admin/dashboard}"
-               th:classappend="${currentUri == '/admin/dashboard' ? 'active' : ''}"
+               th:classappend="${currentUri.startsWith('/admin/dashboard') ? 'active' : ''}"
                class="nav-link">
                 <i class="bi bi-speedometer2"></i><span th:text="#{admin.sidebar.dashboard}">Dashboard</span>
             </a>

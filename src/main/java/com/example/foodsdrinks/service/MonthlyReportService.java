@@ -1,5 +1,6 @@
 package com.example.foodsdrinks.service;
 
+import com.example.foodsdrinks.dto.projection.TopProductSales;
 import com.example.foodsdrinks.dto.report.MonthlyReportData;
 import com.example.foodsdrinks.entity.User;
 import com.example.foodsdrinks.entity.enums.OrderStatus;
@@ -49,11 +50,11 @@ public class MonthlyReportService {
         }
 
         // Top 5 products
-        List<Object[]> topProductRows = orderItemRepository.findTopProductsByStatusAndPeriod(
+        List<TopProductSales> topProductRows = orderItemRepository.findTopProductsByStatusAndPeriod(
                 OrderStatus.DONE, from, now, Pageable.ofSize(5));
 
         List<String> topProducts = topProductRows.stream()
-                .map(row -> String.format("%s - %s sold", row[0], row[1]))
+                .map(row -> String.format("%s - %s sold", row.getProductName(), row.getTotalQuantity()))
                 .toList();
 
         MonthlyReportData data = MonthlyReportData.builder()
