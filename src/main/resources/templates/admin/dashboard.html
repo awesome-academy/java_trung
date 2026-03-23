@@ -5,6 +5,7 @@
       layout:decorate="~{admin/layout}">
 <head>
     <title th:text="#{admin.dashboard.title}">Dashboard</title>
+    <meta name="dashboard-stats-url" th:content="@{/admin/dashboard/stats}"/>
 </head>
 <body>
 <div layout:fragment="content">
@@ -33,9 +34,9 @@
     <!-- Loading overlay -->
     <div id="chartsLoading" class="text-center py-5">
         <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+            <span class="visually-hidden" th:text="#{admin.dashboard.charts.loading.spinner}">Loading...</span>
         </div>
-        <p class="mt-2 text-muted">Loading chart data…</p>
+        <p class="mt-2 text-muted" th:text="#{admin.dashboard.charts.loading.text}">Loading chart data…</p>
     </div>
 
     <!-- Charts (hidden until data loaded) -->
@@ -46,7 +47,8 @@
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white border-0 pt-3 pb-0">
                     <h6 class="mb-0 text-muted">
-                        <i class="bi bi-graph-up-arrow me-1 text-primary"></i>Revenue – Last 6 Months
+                        <i class="bi bi-graph-up-arrow me-1 text-primary"></i>
+                        <span th:text="#{admin.dashboard.charts.revenue.title}">Revenue – Last 6 Months</span>
                     </h6>
                 </div>
                 <div class="card-body">
@@ -60,7 +62,8 @@
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white border-0 pt-3 pb-0">
                     <h6 class="mb-0 text-muted">
-                        <i class="bi bi-pie-chart me-1 text-warning"></i>Orders by Status
+                        <i class="bi bi-pie-chart me-1 text-warning"></i>
+                        <span th:text="#{admin.dashboard.charts.status.title}">Orders by Status</span>
                     </h6>
                 </div>
                 <div class="card-body d-flex align-items-center justify-content-center">
@@ -74,7 +77,8 @@
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white border-0 pt-3 pb-0">
                     <h6 class="mb-0 text-muted">
-                        <i class="bi bi-trophy me-1 text-success"></i>Top 5 Best-Selling Products – This Month
+                        <i class="bi bi-trophy me-1 text-success"></i>
+                        <span th:text="#{admin.dashboard.charts.topProducts.title}">Top 5 Best-Selling Products – This Month</span>
                     </h6>
                 </div>
                 <div class="card-body">
@@ -87,7 +91,8 @@
 
     <!-- Error state -->
     <div id="chartsError" class="alert alert-danger mt-3" style="display:none!important;">
-        <i class="bi bi-exclamation-triangle me-2"></i>Failed to load chart data. Please refresh the page.
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <span th:text="#{admin.dashboard.charts.error}">Failed to load chart data. Please refresh the page.</span>
     </div>
 
 </div>

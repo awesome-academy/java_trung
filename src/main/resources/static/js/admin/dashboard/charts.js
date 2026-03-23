@@ -100,8 +100,10 @@
         const container = document.getElementById('chartsContainer');
         const errorBox  = document.getElementById('chartsError');
 
+        const statsUrl = document.querySelector('meta[name="dashboard-stats-url"]')?.content;
+
         try {
-            const res = await fetch('/admin/dashboard/stats');
+            const res = await fetch(statsUrl);
             if (!res.ok) throw new Error('HTTP ' + res.status);
             const stats = await res.json();
 

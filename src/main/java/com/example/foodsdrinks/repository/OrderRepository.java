@@ -60,7 +60,20 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to);
 
-    @Query("SELECT o.status as status, COUNT(o) as count FROM Order o GROUP BY o.status")
+    @Query("""
+        SELECT o.status as status, COUNT(o) as count
+        FROM Order o
+        GROUP BY o.status
+        ORDER BY CASE o.status
+            WHEN 'PENDING'   THEN 1
+            WHEN 'CONFIRMED' THEN 2
+            WHEN 'PREPARING' THEN 3
+            WHEN 'DELIVERED' THEN 4
+            WHEN 'DONE'      THEN 5
+            WHEN 'CANCELLED' THEN 6
+            ELSE 7
+        END
+    """)
     List<OrderStatusCount> countGroupByStatus();
 
     @Query("""
