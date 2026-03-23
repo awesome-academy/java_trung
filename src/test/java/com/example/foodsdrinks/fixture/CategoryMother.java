@@ -18,17 +18,21 @@ public final class CategoryMother {
 
     private CategoryMother() {}
 
+    public static final LocalDateTime CREATED_AT = LocalDateTime.of(2024, 1, 1, 0, 0, 0);
+
     // ── Entity ──────────────────────────────────────────────────────────────
 
     /** A persisted "Burger" category with no products. */
     public static Category defaultCategory() {
-        return Category.builder()
+        Category category = Category.builder()
                 .id(1L)
                 .name("Burger")
                 .classify(Classify.FOOD)
                 .description("Burger category")
                 .products(Collections.emptyList())
                 .build();
+        category.setCreatedAt(CREATED_AT);
+        return category;
     }
 
     /** A "Pizza" category that already owns at least one product. */
@@ -51,7 +55,7 @@ public final class CategoryMother {
                 .name("Burger")
                 .classify(Classify.FOOD)
                 .description("Burger category")
-                .createdAt(LocalDateTime.now())
+                .createdAt(CREATED_AT)
                 .build();
     }
 

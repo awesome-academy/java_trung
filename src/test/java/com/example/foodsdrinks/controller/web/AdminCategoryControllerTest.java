@@ -90,10 +90,11 @@ class AdminCategoryControllerTest {
         }
 
         @Test
-        @DisplayName("list_whenUnauthenticated_returns401")
-        void list_whenUnauthenticated_returns401() throws Exception {
+        @DisplayName("list_whenUnauthenticated_redirectsToAdminLogin")
+        void list_whenUnauthenticated_redirectsToAdminLogin() throws Exception {
             mockMvc.perform(get("/admin/categories"))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrlPattern("**/admin/login"));
         }
     }
 
@@ -115,10 +116,11 @@ class AdminCategoryControllerTest {
         }
 
         @Test
-        @DisplayName("createForm_whenUnauthenticated_returns401")
-        void createForm_whenUnauthenticated_returns401() throws Exception {
+        @DisplayName("createForm_whenUnauthenticated_redirectsToAdminLogin")
+        void createForm_whenUnauthenticated_redirectsToAdminLogin() throws Exception {
             mockMvc.perform(get("/admin/categories/create"))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrlPattern("**/admin/login"));
         }
     }
 
@@ -168,30 +170,31 @@ class AdminCategoryControllerTest {
 
         @Test
         @WithMockUser(roles = "ADMIN")
-        @DisplayName("create_whenDuplicateName_propagatesAppException")
-        void create_whenDuplicateName_propagatesAppException() throws Exception {
+        @DisplayName("create_whenDuplicateName_redirectsToCategoryListWithErrorMessage")
+        void create_whenDuplicateName_redirectsToCategoryListWithErrorMessage() throws Exception {
             given(categoryService.create(any(CategoryRequest.class)))
                     .willThrow(new AppException(ErrorCode.CATEGORY_ALREADY_EXISTS));
+            given(messageHelper.get(ErrorCode.CATEGORY_ALREADY_EXISTS.getMessageKey()))
+                    .willReturn("Category with this name and classify already exists");
 
             mockMvc.perform(post("/admin/categories")
                             .with(csrf())
                             .param("name", "Burger")
                             .param("classify", "FOOD"))
-                    .andExpect(result ->
-                            assertThat(result.getResolvedException())
-                                    .isInstanceOf(AppException.class)
-                                    .extracting(ex -> ((AppException) ex).getErrorCode())
-                                    .isEqualTo(ErrorCode.CATEGORY_ALREADY_EXISTS));
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/admin/categories"))
+                    .andExpect(flash().attribute("errorMessage", "Category with this name and classify already exists"));
         }
 
         @Test
-        @DisplayName("create_whenUnauthenticated_returns401")
-        void create_whenUnauthenticated_returns401() throws Exception {
+        @DisplayName("create_whenUnauthenticated_redirectsToAdminLogin")
+        void create_whenUnauthenticated_redirectsToAdminLogin() throws Exception {
             mockMvc.perform(post("/admin/categories")
                             .with(csrf())
                             .param("name", "Burger")
                             .param("classify", "FOOD"))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrlPattern("**/admin/login"));
         }
     }
 
@@ -220,22 +223,25 @@ class AdminCategoryControllerTest {
 
         @Test
         @WithMockUser(roles = "ADMIN")
-        @DisplayName("editForm_whenCategoryNotFound_propagatesAppException")
-        void editForm_whenCategoryNotFound_propagatesAppException() throws Exception {
+        @DisplayName("editForm_whenCategoryNotFound_redirectsToCategoryListWithErrorMessage")
+        void editForm_whenCategoryNotFound_redirectsToCategoryListWithErrorMessage() throws Exception {
             given(categoryService.getCategoryEntityById(99L))
                     .willThrow(new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+            given(messageHelper.get(ErrorCode.CATEGORY_NOT_FOUND.getMessageKey()))
+                    .willReturn("Category not found");
 
             mockMvc.perform(get("/admin/categories/{id}/edit", 99L))
-                    .andExpect(result ->
-                            assertThat(result.getResolvedException())
-                                    .isInstanceOf(AppException.class));
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/admin/categories"))
+                    .andExpect(flash().attribute("errorMessage", "Category not found"));
         }
 
         @Test
-        @DisplayName("editForm_whenUnauthenticated_returns401")
-        void editForm_whenUnauthenticated_returns401() throws Exception {
+        @DisplayName("editForm_whenUnauthenticated_redirectsToAdminLogin")
+        void editForm_whenUnauthenticated_redirectsToAdminLogin() throws Exception {
             mockMvc.perform(get("/admin/categories/{id}/edit", 1L))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrlPattern("**/admin/login"));
         }
     }
 
@@ -286,30 +292,31 @@ class AdminCategoryControllerTest {
 
         @Test
         @WithMockUser(roles = "ADMIN")
-        @DisplayName("edit_whenDuplicateName_propagatesAppException")
-        void edit_whenDuplicateName_propagatesAppException() throws Exception {
+        @DisplayName("edit_whenDuplicateName_redirectsToCategoryListWithErrorMessage")
+        void edit_whenDuplicateName_redirectsToCategoryListWithErrorMessage() throws Exception {
             given(categoryService.update(eq(1L), any(CategoryRequest.class)))
                     .willThrow(new AppException(ErrorCode.CATEGORY_ALREADY_EXISTS));
+            given(messageHelper.get(ErrorCode.CATEGORY_ALREADY_EXISTS.getMessageKey()))
+                    .willReturn("Category with this name and classify already exists");
 
             mockMvc.perform(post("/admin/categories/{id}/edit", 1L)
                             .with(csrf())
                             .param("name", "Pizza")
                             .param("classify", "FOOD"))
-                    .andExpect(result ->
-                            assertThat(result.getResolvedException())
-                                    .isInstanceOf(AppException.class)
-                                    .extracting(ex -> ((AppException) ex).getErrorCode())
-                                    .isEqualTo(ErrorCode.CATEGORY_ALREADY_EXISTS));
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/admin/categories"))
+                    .andExpect(flash().attribute("errorMessage", "Category with this name and classify already exists"));
         }
 
         @Test
-        @DisplayName("edit_whenUnauthenticated_returns401")
-        void edit_whenUnauthenticated_returns401() throws Exception {
+        @DisplayName("edit_whenUnauthenticated_redirectsToAdminLogin")
+        void edit_whenUnauthenticated_redirectsToAdminLogin() throws Exception {
             mockMvc.perform(post("/admin/categories/{id}/edit", 1L)
                             .with(csrf())
                             .param("name", "Pizza")
                             .param("classify", "FOOD"))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrlPattern("**/admin/login"));
         }
     }
 
@@ -337,11 +344,12 @@ class AdminCategoryControllerTest {
         }
 
         @Test
-        @DisplayName("delete_whenUnauthenticated_returns401")
-        void delete_whenUnauthenticated_returns401() throws Exception {
+        @DisplayName("delete_whenUnauthenticated_redirectsToAdminLogin")
+        void delete_whenUnauthenticated_redirectsToAdminLogin() throws Exception {
             mockMvc.perform(post("/admin/categories/{id}/delete", 1L)
                             .with(csrf()))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrlPattern("**/admin/login"));
         }
     }
 }
