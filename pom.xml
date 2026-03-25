@@ -33,6 +33,8 @@
 		<springdoc.version>2.8.5</springdoc.version>
 		<lombok.version>1.18.38</lombok.version>
 		<hibernate.version>6.6.42.Final</hibernate.version>
+		<opencsv.version>5.9</opencsv.version>
+		<commons-io.version>2.17.0</commons-io.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -136,6 +138,18 @@
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>${springdoc.version}</version>
 		</dependency>
+
+		<dependency>
+                        <groupId>com.opencsv</groupId>
+                        <artifactId>opencsv</artifactId>
+                        <version>${opencsv.version}</version>
+                </dependency>
+
+                <dependency>
+                        <groupId>commons-io</groupId>
+                        <artifactId>commons-io</artifactId>
+                        <version>${commons-io.version}</version>
+                </dependency>
 
 	</dependencies>
 

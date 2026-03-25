@@ -9,13 +9,29 @@
 <body>
 <div layout:fragment="content">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Page header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <h4 class="mb-0"><i class="bi bi-tags me-2"></i><span th:text="#{admin.categories.title}">Categories</span></h4>
-        <a th:href="@{/admin/categories/create}" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i><span th:text="#{admin.categories.create.button}">Create Category</span>
-        </a>
+        <div class="d-flex gap-2 flex-wrap">
+            <!-- Export CSV -->
+            <a th:href="@{/admin/categories/export}" class="btn btn-outline-success btn-sm">
+                <i class="bi bi-download me-1"></i><span th:text="#{admin.categories.csv.export.button}">Export CSV</span>
+            </a>
+            <!-- Download Template -->
+            <a th:href="@{/admin/categories/import/template}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-file-earmark-arrow-down me-1"></i><span th:text="#{admin.categories.csv.template.button}">Download Template</span>
+            </a>
+            <!-- Open Import Modal -->
+            <button type="button" class="btn btn-outline-primary btn-sm"
+                    data-bs-toggle="modal" data-bs-target="#importModal">
+                <i class="bi bi-upload me-1"></i><span th:text="#{admin.categories.csv.import.button}">Import CSV</span>
+            </button>
+            <!-- Create -->
+            <a th:href="@{/admin/categories/create}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i><span th:text="#{admin.categories.create.button}">Create Category</span>
+            </a>
+        </div>
     </div>
-
 
     <!-- Table -->
     <div class="card shadow-sm border-0">
@@ -83,6 +99,92 @@
         </ul>
     </nav>
 
-</div>
+    <!--
+        Hidden element used as an i18n bridge:
+        Thymeleaf resolves #{...} keys into data-* attributes here;
+        the external JS file reads them via dataset — no inline JS needed.
+    -->
+    <div id="csvConfig" hidden
+         th:attr="data-msg-no-file=#{admin.categories.csv.js.no.file},
+                  data-msg-too-large=#{admin.categories.csv.js.too.large},
+                  data-msg-success=#{admin.categories.csv.js.success},
+                  data-msg-error-rows=#{admin.categories.csv.js.error.rows},
+                  data-msg-error-http=#{admin.categories.csv.js.error.http},
+                  data-msg-error-network=#{admin.categories.csv.js.error.network},
+                  data-msg-error-file=#{admin.categories.csv.js.error.filename}">
+    </div>
+
+    <!-- ── Import CSV Modal ──────────────────────────────────────────────── -->
+    <div class="modal fade" id="importModal" tabindex="-1"
+         aria-labelledby="importModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importModalLabel">
+                        <i class="bi bi-upload me-2"></i><span th:text="#{admin.categories.csv.modal.title}">Import Categories from CSV</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!--
+                    th:action causes Thymeleaf to run RequestDataValueProcessor,
+                    which automatically injects a hidden _csrf field inside the form.
+                    FormData picks it up, so no manual CSRF handling is needed.
+                -->
+                <form id="importForm" th:action="@{/admin/categories/import}" method="post"
+                      enctype="multipart/form-data" onsubmit="return false;">
+                    <div class="modal-body">
+
+                        <p class="text-muted small mb-3"
+                           th:utext="#{admin.categories.csv.modal.instructions}">...</p>
+                        <p class="text-muted small mt-n2 mb-3">
+                            <a th:href="@{/admin/categories/import/template}" target="_blank">
+                                <i class="bi bi-file-earmark-arrow-down"></i>
+                                <span th:text="#{admin.categories.csv.modal.template.link}">Download template</span>
+                            </a>
+                        </p>
+
+                        <div class="mb-3">
+                            <label for="importFile" class="form-label fw-semibold"
+                                   th:text="#{admin.categories.csv.modal.file.label}">CSV File</label>
+                            <input type="file" class="form-control" id="importFile"
+                                   name="file" accept=".csv" required/>
+                            <div class="form-text" th:text="#{admin.categories.csv.modal.file.hint}">Only .csv files are accepted.</div>
+                        </div>
+
+                        <!-- Result feedback (hidden initially) -->
+                        <div id="importAlert" class="alert d-none" role="alert"></div>
+
+                        <!-- Error report download (hidden initially) -->
+                        <button type="button" id="downloadErrorBtn" class="btn btn-warning btn-sm d-none"
+                                th:text="#{admin.categories.csv.modal.download.error.btn}">
+                            <i class="bi bi-file-earmark-excel me-1"></i>Download Error Report
+                        </button>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary"
+                                data-bs-dismiss="modal" th:text="#{admin.common.cancel}">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="importSubmitBtn"
+                                onclick="submitCsvImport()">
+                            <span id="importSpinner"
+                                  class="spinner-border spinner-border-sm me-1 d-none"
+                                  role="status" aria-hidden="true"></span>
+                            <i class="bi bi-upload me-1" id="importIcon"></i>
+                            <span th:text="#{admin.categories.csv.modal.submit.btn}">Import</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div><!-- end layout:fragment="content" -->
+
+
+<th:block layout:fragment="pageScripts">
+    <script th:src="@{/js/admin/categories-list.js}"></script>
+</th:block>
+
 </body>
 </html>

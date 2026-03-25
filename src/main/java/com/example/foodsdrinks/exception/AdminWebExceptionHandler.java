@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
+import java.io.IOException;
+
 @Slf4j
 @ControllerAdvice(basePackages = "com.example.foodsdrinks.controller.web")
 @RequiredArgsConstructor
@@ -22,6 +24,13 @@ public class AdminWebExceptionHandler {
     public String handleAppException(AppException ex, HttpServletRequest request) {
         log.warn("Admin web AppException at {}: {}", request.getRequestURI(), ex.getMessage());
         addFlashError(request, resolveAppExceptionMessage(ex));
+        return resolveRedirectPath(request);
+    }
+
+    @ExceptionHandler(IOException.class)
+    public String handleIOException(IOException ex, HttpServletRequest request) {
+        log.error("I/O error at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+        addFlashError(request, messageHelper.get(ErrorCode.INTERNAL_ERROR.getMessageKey()));
         return resolveRedirectPath(request);
     }
 
