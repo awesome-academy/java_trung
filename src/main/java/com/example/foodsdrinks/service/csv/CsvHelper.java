@@ -11,6 +11,7 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class CsvHelper {
     private CsvHelper() {}
@@ -23,22 +24,31 @@ public final class CsvHelper {
     }
 
     public static <T> byte[] beansToCsvBytes(List<T> rows, Class<T> type, List<String> columnOrder) {
-        StringWriter sw = new StringWriter();
-        HeaderColumnNameMappingStrategy<T> strategy = new HeaderColumnNameMappingStrategy<>();
-        strategy.setType(type);
-        strategy.setColumnOrderOnWrite(
-                Comparator.comparingInt(col -> {
-                    int i = columnOrder.indexOf(col.toLowerCase());
-                    return i < 0 ? Integer.MAX_VALUE : i;
-                }));
-        try {
-            new StatefulBeanToCsvBuilder<T>(sw)
-                    .withMappingStrategy(strategy)
-                    .build()
-                    .write(rows);
-        } catch (CsvDataTypeMismatchException | CsvRequiredFieldEmptyException e) {
-            throw new IllegalStateException("CSV serialization failed unexpectedly", e);
+        if (rows.isEmpty()) {
+            // HeaderColumnNameMappingStrategy skips the header row for empty lists.
+            // Write it manually using the same uppercase convention it applies to @CsvBindByName column values.
+            String header = columnOrder.stream()
+                    .map(String::toUpperCase)
+                    .collect(Collectors.joining(",")) + "\n";
+            return withBom(header);
+        } else {
+            StringWriter sw = new StringWriter();
+            HeaderColumnNameMappingStrategy<T> strategy = new HeaderColumnNameMappingStrategy<>();
+            strategy.setType(type);
+            strategy.setColumnOrderOnWrite(
+                    Comparator.comparingInt(col -> {
+                        int i = columnOrder.indexOf(col.toLowerCase());
+                        return i < 0 ? Integer.MAX_VALUE : i;
+                    }));
+            try {
+                new StatefulBeanToCsvBuilder<T>(sw)
+                        .withMappingStrategy(strategy)
+                        .build()
+                        .write(rows);
+            } catch (CsvDataTypeMismatchException | CsvRequiredFieldEmptyException e) {
+                throw new IllegalStateException("CSV serialization failed unexpectedly", e);
+            }
+            return withBom(sw.toString());
         }
-        return withBom(sw.toString());
     }
 }

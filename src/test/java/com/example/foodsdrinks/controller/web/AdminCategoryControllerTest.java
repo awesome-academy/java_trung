@@ -82,7 +82,8 @@ class AdminCategoryControllerTest {
         @DisplayName("list_whenUnauthenticated_redirectsToAdminLogin")
         void list_whenUnauthenticated_redirectsToAdminLogin() throws Exception {
             mockMvc.perform(get("/admin/categories"))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrlPattern("**/admin/login"));
         }
     }
     // ─────────────────────────────────────────────────
@@ -191,7 +192,8 @@ class AdminCategoryControllerTest {
         @DisplayName("createForm_whenUnauthenticated_redirectsToAdminLogin")
         void createForm_whenUnauthenticated_redirectsToAdminLogin() throws Exception {
             mockMvc.perform(get("/admin/categories/create"))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrlPattern("**/admin/login"));
         }
     }
     // ─────────────────────────────────────────────────
@@ -255,7 +257,8 @@ class AdminCategoryControllerTest {
                             .with(csrf())
                             .param("name", "Burger")
                             .param("classify", "FOOD"))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrlPattern("**/admin/login"));
         }
     }
     // ─────────────────────────────────────────────────
@@ -295,7 +298,8 @@ class AdminCategoryControllerTest {
         @DisplayName("editForm_whenUnauthenticated_redirectsToAdminLogin")
         void editForm_whenUnauthenticated_redirectsToAdminLogin() throws Exception {
             mockMvc.perform(get("/admin/categories/{id}/edit", 1L))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrlPattern("**/admin/login"));
         }
     }
     // ─────────────────────────────────────────────────
@@ -360,7 +364,8 @@ class AdminCategoryControllerTest {
                             .with(csrf())
                             .param("name", "Pizza")
                             .param("classify", "FOOD"))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrlPattern("**/admin/login"));
         }
     }
     // ─────────────────────────────────────────────────
@@ -387,7 +392,8 @@ class AdminCategoryControllerTest {
         void delete_whenUnauthenticated_redirectsToAdminLogin() throws Exception {
             mockMvc.perform(post("/admin/categories/{id}/delete", 1L)
                             .with(csrf()))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrlPattern("**/admin/login"));
         }
     }
 }
