@@ -83,6 +83,6 @@ public class AuthController {
             @AuthenticationPrincipal String userId,
             @Valid @RequestBody SetPasswordRequest request) {
         authService.setPassword(userId, request);
-        return ResponseEntity.ok(ApiResponse.ok(messageHelper.get("success.set.password"), null));
+        return ResponseEntity.ok(ApiResponse.ok(messageHelper.get("success.set.password")));
     }
 }
