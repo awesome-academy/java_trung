@@ -115,12 +115,12 @@ public class AuthService {
         var provider    = resolveProvider(providerKey);
         var profile     = provider.verifyToken(request.code());
 
-        if (socialAccountRepository.existsByProviderNameAndProviderUserIdAndUserIdNot(
+        if (socialAccountRepository.existsByProviderNameAndProviderUserIdAndUser_IdNot(
                 providerKey, profile.providerId(), userId)) {
             throw new AppException(ErrorCode.SOCIAL_ACCOUNT_ALREADY_LINKED);
         }
 
-        socialAccountRepository.findByUserIdAndProviderName(userId, providerKey)
+        socialAccountRepository.findByUser_IdAndProviderName(userId, providerKey)
                 .orElseGet(() -> {
                     var newEntry = UserSocialAccount.builder()
                             .user(user)
@@ -172,7 +172,12 @@ public class AuthService {
             throw new AppException(ErrorCode.EMAIL_CONFLICT_LOCAL_ACCOUNT);
         }
 
-        socialAccountRepository.findByUserIdAndProviderName(user.getId(), providerKey)
+        if (socialAccountRepository.existsByProviderNameAndProviderUserIdAndUser_IdNot(
+                providerKey, profile.providerId(), user.getId())) {
+            throw new AppException(ErrorCode.SOCIAL_ACCOUNT_ALREADY_LINKED);
+        }
+
+        socialAccountRepository.findByUser_IdAndProviderName(user.getId(), providerKey)
                 .orElseGet(() -> {
                     var newEntry = UserSocialAccount.builder()
                             .user(user)

@@ -15,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
@@ -84,36 +86,58 @@ public class GoogleLoginProvider implements SocialLoginProvider {
         form.add("redirect_uri",  redirectUri);
         form.add("grant_type",    "authorization_code");
 
-        var response = restClient.post()
-                .uri("https://oauth2.googleapis.com/token")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(form)
-                .retrieve()
-                .body(TokenExchangeResponse.class);
+        try {
+            var response = restClient.post()
+                    .uri("https://oauth2.googleapis.com/token")
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(form)
+                    .retrieve()
+                    .body(TokenExchangeResponse.class);
 
-        if (response == null || response.idToken() == null) {
-            log.warn("Token exchange with Google returned no id_token");
+            if (response == null || response.idToken() == null) {
+                log.warn("Token exchange with Google returned no id_token");
+                throw new AppException(ErrorCode.INVALID_SOCIAL_TOKEN);
+            }
+
+            return response.idToken();
+        } catch (HttpClientErrorException e) {
+            log.warn("Google token exchange rejected – status={} body={}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
             throw new AppException(ErrorCode.INVALID_SOCIAL_TOKEN);
+        } catch (HttpServerErrorException e) {
+            log.error("Google token endpoint server error – status={} body={}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            throw new AppException(ErrorCode.GOOGLE_SERVICE_UNAVAILABLE);
         }
-
-        return response.idToken();
     }
 
     private SocialProfile buildProfile(Payload payload) {
-        var email   = payload.getEmail();
-        var sub     = payload.getSubject();
+        var email = payload.getEmail();
+        var sub   = payload.getSubject();
+
+        if (email == null || email.isBlank()) {
+            log.warn("Google ID token has no email claim – sub={}", sub);
+            throw new AppException(ErrorCode.INVALID_SOCIAL_TOKEN);
+        }
+
+        if (Boolean.FALSE.equals(payload.getEmailVerified())) {
+            log.warn("Google ID token email is not verified – sub={}", sub);
+            throw new AppException(ErrorCode.INVALID_SOCIAL_TOKEN);
+        }
+
         var name    = (String) payload.get("name");
         var picture = (String) payload.get("picture");
         log.debug("Google token verified – sub={}, email={}", sub, email);
         return new SocialProfile(email, sub, name, picture);
     }
 
-    private SocialProfile verifyTokenFallback(String authorizationCode, Throwable cause) {
-        if (cause instanceof CallNotPermittedException) {
-            log.warn("Google auth circuit is OPEN – fast-fail without calling Google: {}", cause.getMessage());
-        } else {
-            log.error("Google auth timed out, circuit breaker recorded a failure: {}", cause.getMessage(), cause);
-        }
+    private SocialProfile verifyTokenFallback(String code, CallNotPermittedException e) {
+        log.warn("Google auth circuit is OPEN – fast-fail: {}", e.getMessage());
+        throw new AppException(ErrorCode.GOOGLE_SERVICE_UNAVAILABLE);
+    }
+
+    private SocialProfile verifyTokenFallback(String code, ResourceAccessException e) {
+        log.error("Google auth timed out or network error: {}", e.getMessage());
         throw new AppException(ErrorCode.GOOGLE_SERVICE_UNAVAILABLE);
     }
 

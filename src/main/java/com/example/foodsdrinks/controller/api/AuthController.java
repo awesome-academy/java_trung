@@ -57,7 +57,7 @@ public class AuthController {
 
     // ── Social auth ──────────────────────────────────────────────────────────
 
-    @Operation(summary = "Social login (Google, etc.) – verifies an OAuth ID token and returns JWT")
+    @Operation(summary = "Social login (Google, etc.) – returns JWT token")
     @PostMapping("/social-login")
     @RateLimiter(name = "socialLogin")
     public ResponseEntity<ApiResponse<AuthResponse>> socialLogin(

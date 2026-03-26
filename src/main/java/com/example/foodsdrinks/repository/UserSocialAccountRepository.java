@@ -11,8 +11,8 @@ public interface UserSocialAccountRepository extends JpaRepository<UserSocialAcc
 
     Optional<UserSocialAccount> findByProviderNameAndProviderUserId(String providerName, String providerUserId);
 
-    Optional<UserSocialAccount> findByUserIdAndProviderName(String userId, String providerName);
+    Optional<UserSocialAccount> findByUser_IdAndProviderName(String userId, String providerName);
 
-    boolean existsByProviderNameAndProviderUserIdAndUserIdNot(
+    boolean existsByProviderNameAndProviderUserIdAndUser_IdNot(
             String providerName, String providerUserId, String excludedUserId);
 }
