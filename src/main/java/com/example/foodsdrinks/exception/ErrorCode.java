@@ -49,7 +49,10 @@ public enum ErrorCode {
     INVALID_PRICE_RANGE(HttpStatus.BAD_REQUEST, "error.invalid.price.range"),
     INVALID_ENUM_VALUE(HttpStatus.BAD_REQUEST, "error.invalid.enum.value"),
     INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "error.invalid.file.type"),
-    FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "error.file.upload.failed");
+    FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "error.file.upload.failed"),
+    CSV_INVALID_FORMAT(HttpStatus.BAD_REQUEST, "error.csv.invalid.format"),
+    CSV_EMPTY(HttpStatus.BAD_REQUEST, "error.csv.empty"),
+    CSV_FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "error.csv.file.too.large");
 
     private final HttpStatus status;
     private final String messageKey;
