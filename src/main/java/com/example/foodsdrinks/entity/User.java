@@ -1,5 +1,6 @@
 package com.example.foodsdrinks.entity;
 
+import com.example.foodsdrinks.entity.enums.AuthProvider;
 import com.example.foodsdrinks.entity.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,8 +23,14 @@ public class User extends BaseEntity {
 	@Column(nullable = false, unique = true, length = 255)
 	private String email;
 
-	@Column(nullable = false, length = 255)
+	/** Nullable: social-only users have no password. */
+	@Column(nullable = true, length = 255)
 	private String password;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "auth_provider", nullable = false, length = 10)
+	@Builder.Default
+	private AuthProvider authProvider = AuthProvider.LOCAL;
 
 	@Column(name = "full_name", length = 100)
 	private String fullName;
@@ -49,4 +56,7 @@ public class User extends BaseEntity {
 
 	@OneToMany(mappedBy = "user")
 	private List<Order> orders;
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<UserSocialAccount> socialAccounts;
 }

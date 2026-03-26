@@ -1,5 +1,6 @@
 package com.example.foodsdrinks.dto.response;
 
+import com.example.foodsdrinks.entity.enums.AuthProvider;
 import com.example.foodsdrinks.entity.enums.Role;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,6 +17,7 @@ public class UserResponse {
     private String phone;
     private String avatarUrl;
     private Role role;
+    private AuthProvider authProvider;
     private boolean active;
     private LocalDateTime createdAt;
 }

@@ -3,6 +3,7 @@ package com.example.foodsdrinks.exception;
 import com.example.foodsdrinks.config.MessageHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -77,6 +78,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(ErrorCode.UNAUTHORIZED.getStatus())
                 .body(ErrorResponse.of(ErrorCode.UNAUTHORIZED, messageHelper));
+    }
+
+    @ExceptionHandler(RequestNotPermitted.class)
+    public ResponseEntity<ErrorResponse> handleRateLimitExceeded(RequestNotPermitted ex) {
+        log.warn("Rate limit exceeded: {}", ex.getMessage());
+        return ResponseEntity
+                .status(ErrorCode.RATE_LIMIT_EXCEEDED.getStatus())
+                .body(ErrorResponse.of(ErrorCode.RATE_LIMIT_EXCEEDED, messageHelper));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
