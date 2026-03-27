@@ -6,6 +6,9 @@ target/
 uploads/
 .github/
 
+### Environment – secrets must never be committed ###
+.env
+
 ### STS ###
 .apt_generated
 .classpath

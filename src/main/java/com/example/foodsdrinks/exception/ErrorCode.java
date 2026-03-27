@@ -14,6 +14,15 @@ public enum ErrorCode {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "error.unauthorized"),
     FORBIDDEN(HttpStatus.FORBIDDEN, "error.forbidden"),
 
+    // Social login
+    EMAIL_CONFLICT_LOCAL_ACCOUNT(HttpStatus.CONFLICT, "error.social.email.conflict.local"),
+    SOCIAL_ACCOUNT_ALREADY_LINKED(HttpStatus.CONFLICT, "error.social.account.already.linked"),
+    UNSUPPORTED_PROVIDER(HttpStatus.BAD_REQUEST, "error.social.unsupported.provider"),
+    INVALID_SOCIAL_TOKEN(HttpStatus.UNAUTHORIZED, "error.social.invalid.token"),
+    INVALID_OLD_PASSWORD(HttpStatus.BAD_REQUEST, "error.social.invalid.old.password"),
+    SOCIAL_ONLY_ACCOUNT(HttpStatus.BAD_REQUEST, "error.social.only.account"),
+    GOOGLE_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "error.social.google.unavailable"),
+
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "error.user.not.found"),
     CURRENT_USER_CANNOT_BE_DISABLED(HttpStatus.BAD_REQUEST, "error.current.user.cannot.be.disabled"),
 
@@ -50,6 +59,8 @@ public enum ErrorCode {
     INVALID_ENUM_VALUE(HttpStatus.BAD_REQUEST, "error.invalid.enum.value"),
     INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "error.invalid.file.type"),
     FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "error.file.upload.failed"),
+
+    RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "error.rate.limit.exceeded"),
     CSV_INVALID_FORMAT(HttpStatus.BAD_REQUEST, "error.csv.invalid.format"),
     CSV_EMPTY(HttpStatus.BAD_REQUEST, "error.csv.empty"),
     CSV_FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "error.csv.file.too.large");

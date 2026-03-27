@@ -1,12 +1,12 @@
 package com.example.foodsdrinks.controller.api;
 
 import com.example.foodsdrinks.config.MessageHelper;
-import com.example.foodsdrinks.dto.request.LoginRequest;
-import com.example.foodsdrinks.dto.request.RegisterRequest;
+import com.example.foodsdrinks.dto.request.*;
 import com.example.foodsdrinks.dto.response.ApiResponse;
 import com.example.foodsdrinks.dto.response.AuthResponse;
 import com.example.foodsdrinks.dto.response.UserResponse;
 import com.example.foodsdrinks.service.AuthService;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,11 +26,13 @@ public class AuthController {
     private final AuthService authService;
     private final MessageHelper messageHelper;
 
+    // ── Local auth ───────────────────────────────────────────────────────────
+
     @Operation(summary = "Register a new user account")
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthResponse>> register(
             @Valid @RequestBody RegisterRequest request) {
-        AuthResponse data = authService.register(request);
+        var data = authService.register(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.ok(messageHelper.get("success.register"), data));
@@ -40,17 +42,47 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(
             @Valid @RequestBody LoginRequest request) {
-        AuthResponse data = authService.login(request);
-        return ResponseEntity.ok(
-                ApiResponse.ok(messageHelper.get("success.login"), data));
+        var data = authService.login(request);
+        return ResponseEntity.ok(ApiResponse.ok(messageHelper.get("success.login"), data));
     }
 
     @Operation(summary = "Get current authenticated user profile",
-            security = @SecurityRequirement(name = "bearerAuth"))
+               security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserResponse>> getMe(
             @AuthenticationPrincipal String userId) {
-        UserResponse data = authService.getMe(userId);
+        var data = authService.getMe(userId);
         return ResponseEntity.ok(ApiResponse.ok(data));
+    }
+
+    // ── Social auth ──────────────────────────────────────────────────────────
+
+    @Operation(summary = "Social login (Google, etc.) – returns JWT token")
+    @PostMapping("/social-login")
+    @RateLimiter(name = "socialLogin")
+    public ResponseEntity<ApiResponse<AuthResponse>> socialLogin(
+            @Valid @RequestBody SocialLoginRequest request) {
+        var data = authService.handleSocialLogin(request);
+        return ResponseEntity.ok(ApiResponse.ok(messageHelper.get("success.social.login"), data));
+    }
+
+    @Operation(summary = "Link a social account to the authenticated user",
+               security = @SecurityRequirement(name = "bearerAuth"))
+    @PostMapping("/link-account")
+    public ResponseEntity<ApiResponse<UserResponse>> linkAccount(
+            @AuthenticationPrincipal String userId,
+            @Valid @RequestBody SocialLoginRequest request) {
+        var data = authService.linkAccount(userId, request);
+        return ResponseEntity.ok(ApiResponse.ok(messageHelper.get("success.link.account"), data));
+    }
+
+    @Operation(summary = "Set or change password for the authenticated user",
+               security = @SecurityRequirement(name = "bearerAuth"))
+    @PostMapping("/set-password")
+    public ResponseEntity<ApiResponse<Void>> setPassword(
+            @AuthenticationPrincipal String userId,
+            @Valid @RequestBody SetPasswordRequest request) {
+        authService.setPassword(userId, request);
+        return ResponseEntity.ok(ApiResponse.ok(messageHelper.get("success.set.password")));
     }
 }
